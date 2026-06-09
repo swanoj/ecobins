@@ -382,36 +382,36 @@ function StepPostcode({ data, update, onNext }: StepProps) {
 				zoomControl: true,
 				gestureHandling: "cooperative",
 				styles: [
-					{ elementType: "geometry", stylers: [{ color: "#edf2f7" }] },
-					{ elementType: "labels.text.fill", stylers: [{ color: "#718096" }] },
+					{ elementType: "geometry", stylers: [{ color: "#090d16" }] },
+					{ elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
 					{
 						elementType: "labels.text.stroke",
-						stylers: [{ color: "#edf2f7" }],
+						stylers: [{ color: "#090d16" }],
 					},
 					{
 						featureType: "water",
 						elementType: "geometry",
-						stylers: [{ color: "#bee3f8" }],
+						stylers: [{ color: "#111827" }],
 					},
 					{
 						featureType: "road",
 						elementType: "geometry",
-						stylers: [{ color: "#ffffff" }],
+						stylers: [{ color: "#1e293b" }],
 					},
 					{
 						featureType: "road.arterial",
 						elementType: "geometry",
-						stylers: [{ color: "#e2e8f0" }],
+						stylers: [{ color: "#1e293b" }],
 					},
 					{
 						featureType: "road.highway",
 						elementType: "geometry",
-						stylers: [{ color: "#cbd5e0" }],
+						stylers: [{ color: "#334155" }],
 					},
 					{
 						featureType: "administrative.locality",
 						elementType: "labels.text.fill",
-						stylers: [{ color: "#4a5568" }],
+						stylers: [{ color: "#cbd5e1" }],
 					},
 					{ featureType: "poi", stylers: [{ visibility: "off" }] },
 					{ featureType: "transit", stylers: [{ visibility: "off" }] },
@@ -425,11 +425,11 @@ function StepPostcode({ data, update, onNext }: StepProps) {
 
 			map.data.addGeoJson(geoData);
 			map.data.setStyle({
-				fillColor: "#16a34a",
-				fillOpacity: 0.13,
-				strokeColor: "#16a34a",
+				fillColor: "#22c55e",
+				fillOpacity: 0.06,
+				strokeColor: "#22c55e",
 				strokeWeight: 1.5,
-				strokeOpacity: 0.8,
+				strokeOpacity: 0.4,
 				cursor: "pointer",
 			});
 
@@ -437,14 +437,31 @@ function StepPostcode({ data, update, onNext }: StepProps) {
 				const pc = e.feature.getProperty("POA_CODE21") as string;
 				const sel = pc === selectedRef.current;
 				map.data.overrideStyle(e.feature, {
-					fillOpacity: sel ? 0.65 : 0.3,
-					strokeWeight: 2.5,
+					strokeColor: sel ? "#22c55e" : "#4ade80",
+					strokeWeight: sel ? 4.5 : 3.5,
+					strokeOpacity: sel ? 1.0 : 0.9,
+					fillOpacity: sel ? 0.45 : 0.22,
 				});
 				const info = POSTCODE_COUNCIL[pc];
 				if (infoRef.current && e.latLng) {
 					infoRef.current.setContent(
-						`<div style="font:600 13px/1.5 system-ui,sans-serif">${info?.suburb ?? pc}</div>` +
-							`<div style="font:400 12px/1.5 system-ui,sans-serif;color:#555">${pc} · click to select</div>`,
+						`<div style="` +
+							`background: #0f172a;` +
+							`border: 1px solid rgba(74, 222, 128, 0.4);` +
+							`padding: 10px 14px;` +
+							`border-radius: 12px;` +
+							`color: #f8fafc;` +
+							`font-family: var(--font-hanken), system-ui, sans-serif;` +
+							`box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 0 15px rgba(34, 197, 94, 0.15);` +
+							`min-width: 140px;` +
+							`font-size: 13px;` +
+							`line-height: 1.4;` +
+							`display: inline-block;` +
+							`text-align: left;` +
+							`">` +
+							`<div style="font-weight: 700; font-size: 14px; color: #4ade80; margin-bottom: 2px;">${info?.suburb ?? pc}</div>` +
+							`<div style="font-weight: 500; font-size: 11px; color: #94a3b8;">Postcode ${pc} · <span style="color: #38bdf8; font-weight: 600;">click to select</span></div>` +
+							`</div>`,
 					);
 					infoRef.current.setPosition(e.latLng);
 					infoRef.current.open(map);
@@ -481,11 +498,11 @@ function StepPostcode({ data, update, onNext }: StepProps) {
 			const pc = feature.getProperty("POA_CODE21") as string;
 			const sel = pc === data.postcode;
 			return {
-				fillColor: "#16a34a",
-				fillOpacity: sel ? 0.45 : 0.13,
-				strokeColor: "#16a34a",
-				strokeWeight: sel ? 2.5 : 1.5,
-				strokeOpacity: 0.8,
+				fillColor: "#22c55e",
+				fillOpacity: sel ? 0.35 : 0.06,
+				strokeColor: "#22c55e",
+				strokeWeight: sel ? 4.5 : 1.5,
+				strokeOpacity: sel ? 1.0 : 0.4,
 				cursor: "pointer",
 			};
 		});
