@@ -1,26 +1,53 @@
 {
-  "name": "ecobins",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "next": "16.2.7",
-    "react": "19.2.4",
-    "react-dom": "19.2.4"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.2.7",
-    "tailwindcss": "^4",
-    "typescript": "^5"
-  }
+	"name": "ecobins",
+	"version": "0.1.0",
+	"private": true,
+	"scripts": {
+		"dev": "next dev --turbopack",
+		"build": "next build",
+		"start": "next start",
+		"lint": "biome lint .",
+		"format": "biome format --write .",
+		"check": "biome check --write ."
+	},
+	"dependencies": {
+		"@hookform/resolvers": "^5.4.0",
+		"@react-email/components": "^1.0.12",
+		"@react-three/drei": "^10.7.7",
+		"@react-three/fiber": "^9.6.1",
+		"@supabase/supabase-js": "^2.108.0",
+		"@theatre/core": "^0.7.2",
+		"@theatre/r3f": "^0.7.2",
+		"@types/google.maps": "^3.65.1",
+		"@vercel/analytics": "^2.0.1",
+		"@vercel/speed-insights": "^2.0.0",
+		"framer-motion": "^12.40.0",
+		"next": "16.2.7",
+		"nuqs": "^2.8.9",
+		"posthog-js": "^1.383.1",
+		"react": "19.2.4",
+		"react-dom": "19.2.4",
+		"react-hook-form": "^7.78.0",
+		"resend": "^6.12.4",
+		"three": "^0.184.0",
+		"use-places-autocomplete": "^4.0.1",
+		"zod": "^4.4.3"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.4.16",
+		"@tailwindcss/postcss": "^4",
+		"@theatre/studio": "^0.7.2",
+		"@types/node": "^20",
+		"@types/react": "^19",
+		"@types/react-dom": "^19",
+		"@types/three": "^0.184.1",
+		"class-variance-authority": "^0.7.1",
+		"clsx": "^2.1.1",
+		"eslint": "^9",
+		"eslint-config-next": "16.2.7",
+		"lucide-react": "^1.17.0",
+		"tailwind-merge": "^3.6.0",
+		"tailwindcss": "^4",
+		"typescript": "^5"
+	}
 }
