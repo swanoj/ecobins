@@ -4,7 +4,9 @@ import { BookingConfirmation } from "@/emails/BookingConfirmation";
 import { getSupabase } from "@/lib/supabase";
 import { bookingSchema } from "@/lib/validations";
 
-const resend = new Resend(process.env.RESEND_API_KEY || "re_mock_key_for_build");
+const resend = new Resend(
+	process.env.RESEND_API_KEY || "re_mock_key_for_build",
+);
 
 export async function POST(req: Request) {
 	const body = await req.json();

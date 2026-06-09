@@ -13,9 +13,20 @@ import {
 	Trash2,
 	User,
 } from "lucide-react";
+import dynamic from "next/dynamic";
 import { usePostHog } from "posthog-js/react";
 import { useEffect, useRef, useState } from "react";
 import { AddressAutocomplete } from "@/components/sections/AddressAutocomplete";
+
+const BookingBinsCanvas = dynamic(() => import("../3d/BookingBinsCanvas"), {
+	ssr: false,
+	loading: () => (
+		<div className="relative w-full h-[180px] sm:h-[220px] rounded-2xl overflow-hidden bg-slate-50 flex items-center justify-center border border-slate-200/60 shadow-inner mb-6">
+			<div className="w-6 h-6 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+		</div>
+	),
+});
+
 import {
 	BIN_OPTIONS,
 	type BinType,
@@ -772,6 +783,9 @@ function StepBins({ data, update, onNext, onBack }: StepProps) {
 				Select the types and quantities. Mix and match as needed.
 			</p>
 
+			{/* Interactive 3D Selected Bins Canvas */}
+			<BookingBinsCanvas bins={data.bins} />
+
 			<div className="flex flex-col gap-3 mb-4">
 				{BIN_OPTIONS.map(({ id, label, lid, hex, desc }) => {
 					const count = data.bins[id];
@@ -978,7 +992,39 @@ function StepAddress({ data, update, onNext, onBack }: StepProps) {
 
 // ─── Step 5 — Contact + Date ─────────────────────────────────────────────────
 
-function StepContact({ data, update, onNext, onBack }: StepProps) {
+function getNextBinDates(binDay: string): Date[] {
+	const dayMap: Record<string, number> = {
+		Monday: 1,
+		Tuesday: 2,
+		Wednesday: 3,
+		Thursday: 4,
+		Friday: 5,
+	};
+	const targetDay = dayMap[binDay];
+	if (targetDay === undefined) return [];
+
+	const dates: Date[] = [];
+	const current = new Date();
+	// Start checking from tomorrow
+	current.setDate(current.getDate() + 1);
+
+	for (let i = 0; i < 30; i++) {
+		if (current.getDay() === targetDay) {
+			dates.push(new Date(current));
+			if (dates.length === 3) break;
+		}
+		current.setDate(current.getDate() + 1);
+	}
+	return dates;
+}
+
+function StepContact({
+	data,
+	update,
+	onNext,
+	onBack,
+	isSavingLead,
+}: StepProps) {
 	const canNext =
 		data.name.trim().length > 1 &&
 		data.phone.trim().length > 7 &&
@@ -989,6 +1035,10 @@ function StepContact({ data, update, onNext, onBack }: StepProps) {
 	const tomorrow = new Date();
 	tomorrow.setDate(tomorrow.getDate() + 1);
 	const minDate = tomorrow.toISOString().split("T")[0];
+
+	const council = POSTCODE_COUNCIL[data.postcode];
+	const suggestedDay = council?.suggestedBinDay; // e.g. "Wednesday"
+	const recommendedDates = suggestedDay ? getNextBinDates(suggestedDay) : [];
 
 	return (
 		<div>
@@ -1002,6 +1052,7 @@ function StepContact({ data, update, onNext, onBack }: StepProps) {
 					value={data.name}
 					onStringChange={(v) => update("name", v)}
 					placeholder="Jane Smith"
+					disabled={isSavingLead}
 				/>
 			</FieldWrap>
 
@@ -1012,6 +1063,7 @@ function StepContact({ data, update, onNext, onBack }: StepProps) {
 						onStringChange={(v) => update("phone", v)}
 						type="tel"
 						placeholder="0400 000 000"
+						disabled={isSavingLead}
 					/>
 				</FieldWrap>
 				<FieldWrap label="Email">
@@ -1020,6 +1072,7 @@ function StepContact({ data, update, onNext, onBack }: StepProps) {
 						onStringChange={(v) => update("email", v)}
 						type="email"
 						placeholder="you@email.com"
+						disabled={isSavingLead}
 					/>
 				</FieldWrap>
 			</div>
@@ -1030,8 +1083,44 @@ function StepContact({ data, update, onNext, onBack }: StepProps) {
 					min={minDate}
 					value={data.date}
 					onChange={(e) => update("date", e.target.value)}
-					className="w-full px-4 py-3 border-[1.5px] border-[var(--color-line)] rounded-[12px] font-body text-[15px] bg-white text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-green)] transition-colors"
+					disabled={isSavingLead}
+					className="w-full px-4 py-3 border-[1.5px] border-[var(--color-line)] rounded-[12px] font-body text-[15px] bg-white text-[var(--color-ink)] focus:outline-none focus:border-[var(--color-green)] transition-colors mb-3"
 				/>
+
+				{recommendedDates.length > 0 && (
+					<div className="mb-4 mt-2">
+						<span className="block font-semibold text-[13px] text-[var(--color-ink)] mb-[7px]">
+							💡 Recommended dates (your bin day is {suggestedDay}):
+						</span>
+						<div className="flex gap-2 flex-wrap">
+							{recommendedDates.map((d) => {
+								const dateValue = d.toISOString().split("T")[0];
+								const active = data.date === dateValue;
+								const formattedLabel = d.toLocaleDateString("en-AU", {
+									weekday: "short",
+									day: "numeric",
+									month: "short",
+								});
+								return (
+									<button
+										key={dateValue}
+										type="button"
+										disabled={isSavingLead}
+										onClick={() => update("date", dateValue)}
+										className={`px-3 py-1.5 rounded-full text-[12px] font-bold border transition-all ${
+											active
+												? "bg-[var(--color-green)] text-white border-[var(--color-green)]"
+												: "bg-slate-50 text-slate-700 border-slate-200 hover:border-[var(--color-green)] hover:text-[var(--color-green)] disabled:opacity-50"
+										}`}
+									>
+										{formattedLabel}
+									</button>
+								);
+							})}
+						</div>
+					</div>
+				)}
+
 				<p className="mt-1.5 text-[12px] text-[var(--color-muted)]">
 					Should be a day your bins are out. We'll confirm the exact date by
 					text.
@@ -1039,11 +1128,20 @@ function StepContact({ data, update, onNext, onBack }: StepProps) {
 			</FieldWrap>
 
 			<div className="flex gap-3">
-				<Btn variant="ghost" onClick={onBack}>
+				<Btn variant="ghost" onClick={onBack} disabled={isSavingLead}>
 					<ArrowLeft size={16} /> Back
 				</Btn>
-				<Btn onClick={onNext} disabled={!canNext}>
-					Review booking <ArrowRight size={16} />
+				<Btn onClick={onNext} disabled={!canNext || isSavingLead}>
+					{isSavingLead ? (
+						<div className="flex items-center gap-2">
+							<div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+							Saving...
+						</div>
+					) : (
+						<div className="flex items-center gap-2">
+							Review booking <ArrowRight size={16} />
+						</div>
+					)}
 				</Btn>
 			</div>
 		</div>
@@ -1190,6 +1288,7 @@ interface StepProps {
 	update: <K extends keyof WizardData>(key: K, value: WizardData[K]) => void;
 	onNext: () => void;
 	onBack: () => void;
+	isSavingLead?: boolean;
 }
 
 // ─── Main wizard ─────────────────────────────────────────────────────────────
@@ -1198,6 +1297,7 @@ export function BookingWizard() {
 	const [step, setStep] = useState(0);
 	const [dir, setDir] = useState<1 | -1>(1);
 	const [data, setData] = useState<WizardData>(EMPTY);
+	const [isSavingLead, setIsSavingLead] = useState(false);
 	const posthog = usePostHog();
 
 	function update<K extends keyof WizardData>(key: K, value: WizardData[K]) {
@@ -1213,6 +1313,44 @@ export function BookingWizard() {
 	function back() {
 		setDir(-1);
 		setStep((s) => s - 1);
+	}
+
+	async function handleContactSubmit() {
+		setIsSavingLead(true);
+
+		// Format selected bins list into a clear human-readable string for Supabase and emails
+		const binStr = BIN_OPTIONS.filter(({ id }) => data.bins[id] > 0)
+			.map(({ id, label }) => `${data.bins[id]}x ${label}`)
+			.join(", ");
+
+		try {
+			const response = await fetch("/api/book", {
+				method: "POST",
+				headers: {
+					"Content-Type": "application/json",
+				},
+				body: JSON.stringify({
+					name: data.name,
+					phone: data.phone,
+					email: data.email,
+					address: `${data.address}, ${data.suburb}`,
+					binday: data.binday,
+					bins: binStr,
+				}),
+			});
+
+			if (!response.ok) {
+				console.error("Lead capture API error:", response.status);
+			}
+		} catch (error) {
+			console.error("Lead capture background sync error:", error);
+		} finally {
+			setIsSavingLead(false);
+			// Transition to step 5 (Confirm) regardless of API results so the user route is never blocked
+			setDir(1);
+			setStep(5);
+			posthog?.capture("booking_wizard_step", { step: 6 });
+		}
 	}
 
 	function handleSubmit() {
@@ -1320,7 +1458,13 @@ export function BookingWizard() {
 								{step === 1 && <StepFrequency {...props} />}
 								{step === 2 && <StepBins {...props} />}
 								{step === 3 && <StepAddress {...props} />}
-								{step === 4 && <StepContact {...props} />}
+								{step === 4 && (
+									<StepContact
+										{...props}
+										onNext={handleContactSubmit}
+										isSavingLead={isSavingLead}
+									/>
+								)}
 								{step === 5 && (
 									<StepConfirm {...props} onSubmit={handleSubmit} />
 								)}
