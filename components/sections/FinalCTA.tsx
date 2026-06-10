@@ -6,7 +6,7 @@ import Link from "next/link";
 export function FinalCTA() {
 	return (
 		<section className="py-[78px] text-center">
-			<div className="mx-auto max-w-[1180px] px-6">
+			<div className="mx-auto max-w-7xl px-6">
 				<motion.div
 					initial={{ opacity: 0, y: 22 }}
 					whileInView={{ opacity: 1, y: 0 }}
@@ -24,13 +24,13 @@ export function FinalCTA() {
 					<div className="mt-7 flex gap-3.5 justify-center flex-wrap">
 						<Link
 							href="#book"
-							className="inline-flex items-center gap-2 font-display font-extrabold text-[18px] text-white bg-[var(--color-green)] px-[34px] py-[19px] rounded-full transition-all hover:-translate-y-0.5 hover:bg-[var(--color-green-deep)] shadow-[0_10px_24px_-8px_color-mix(in_srgb,var(--color-green)_70%,transparent)]"
+							className="inline-flex items-center gap-2 font-display font-extrabold text-[18px] text-white bg-[var(--color-green)] px-[34px] py-[19px] rounded-full scale-100 active:scale-[0.97] transition-all hover:-translate-y-0.5 hover:bg-[var(--color-green-deep)] hover:shadow-[0_12px_28px_-6px_rgba(46,154,79,0.35)] shadow-[0_10px_24px_-8px_color-mix(in_srgb,var(--color-green)_70%,transparent)]"
 						>
 							Claim 2 cleans for $39 →
 						</Link>
 						<Link
 							href="tel:0402544575"
-							className="inline-flex items-center gap-2 font-display font-extrabold text-[18px] px-[34px] py-[19px] rounded-full border-[1.5px] border-[var(--color-line)] hover:border-[var(--color-green)] hover:text-[var(--color-green-deep)] transition-colors"
+							className="inline-flex items-center gap-2 font-display font-extrabold text-[18px] px-[34px] py-[19px] rounded-full border-[1.5px] border-[var(--color-line)] scale-100 active:scale-[0.97] hover:border-[var(--color-green)] hover:text-[var(--color-green-deep)] hover:bg-slate-50 transition-all hover:shadow-sm"
 						>
 							Call or SMS 0402 544 575
 						</Link>

@@ -26,9 +26,9 @@ const values = [
 export function WhyEco() {
 	return (
 		<section className="py-[78px]">
-			<div className="mx-auto max-w-[1180px] px-6 grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-[54px] items-center">
+			<div className="mx-auto max-w-7xl px-6 grid grid-cols-1 lg:grid-cols-[0.9fr_1.1fr] gap-[54px] items-center">
 				<motion.div
-					className="relative w-full h-[440px] rounded-[20px] overflow-hidden shadow-[var(--shadow-lg)]"
+					className="relative w-full h-[260px] sm:h-[360px] lg:h-[440px] rounded-[20px] overflow-hidden shadow-[var(--shadow-lg)]"
 					initial={{ opacity: 0, y: 22 }}
 					whileInView={{ opacity: 1, y: 0 }}
 					viewport={{ once: true }}
@@ -64,8 +64,8 @@ export function WhyEco() {
 
 					<div className="mt-7 flex flex-col gap-[22px]">
 						{values.map(({ icon: Icon, title, desc }) => (
-							<div key={title} className="flex gap-4">
-								<span className="w-[46px] h-[46px] rounded-[12px] bg-[color-mix(in_srgb,var(--color-teal)_14%,transparent)] text-[var(--color-teal)] flex items-center justify-center flex-none">
+							<div key={title} className="flex gap-4 group">
+								<span className="w-[46px] h-[46px] rounded-[12px] bg-[color-mix(in_srgb,var(--color-teal)_14%,transparent)] text-[var(--color-teal)] flex items-center justify-center flex-none group-hover:scale-110 transition-transform duration-300">
 									<Icon size={23} />
 								</span>
 								<div>
@@ -80,7 +80,7 @@ export function WhyEco() {
 
 					<Link
 						href="#book"
-						className="mt-[30px] inline-flex items-center gap-2 font-display font-extrabold text-[18px] text-white bg-[var(--color-navy)] px-[34px] py-[19px] rounded-full transition-all hover:-translate-y-0.5"
+						className="mt-[30px] inline-flex items-center gap-2 font-display font-extrabold text-[18px] text-white bg-[var(--color-navy)] px-[34px] py-[19px] rounded-full scale-100 active:scale-[0.97] hover:shadow-[0_12px_28px_-6px_rgba(12,58,82,0.3)] transition-all hover:bg-slate-900"
 					>
 						Book my 2 cleans
 					</Link>

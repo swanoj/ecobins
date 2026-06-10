@@ -19,7 +19,7 @@ const stars = Array(5).fill(null);
 export function Hero() {
 	return (
 		<section className="relative pt-[54px] pb-[40px]" id="top">
-			<div className="mx-auto max-w-[1180px] px-6 grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-[54px] items-center">
+			<div className="mx-auto max-w-7xl px-6 grid grid-cols-1 lg:grid-cols-[1.05fr_0.95fr] gap-[54px] items-center">
 				{/* Copy */}
 				<motion.div
 					initial={{ opacity: 0, y: 24 }}
@@ -59,13 +59,13 @@ export function Hero() {
 					<div className="mt-6 flex flex-wrap gap-[14px] items-center">
 						<Link
 							href="#book"
-							className="inline-flex items-center gap-2 font-display font-extrabold text-[18px] text-white bg-[var(--color-green)] px-[34px] py-[19px] rounded-full transition-all hover:-translate-y-0.5 hover:bg-[var(--color-green-deep)] shadow-[0_10px_24px_-8px_color-mix(in_srgb,var(--color-green)_70%,transparent)]"
+							className="inline-flex items-center gap-2 font-display font-extrabold text-[18px] text-white bg-[var(--color-green)] px-[34px] py-[19px] rounded-full scale-100 active:scale-[0.97] transition-all hover:-translate-y-0.5 hover:bg-[var(--color-green-deep)] hover:shadow-[0_12px_28px_-6px_rgba(46,154,79,0.35)] shadow-[0_10px_24px_-8px_color-mix(in_srgb,var(--color-green)_70%,transparent)]"
 						>
 							Claim 2 cleans for $39 →
 						</Link>
 						<Link
 							href="tel:0402544575"
-							className="inline-flex items-center gap-2 font-display font-extrabold text-[18px] px-[34px] py-[19px] rounded-full border-[1.5px] border-[var(--color-line)] hover:border-[var(--color-green)] hover:text-[var(--color-green-deep)] transition-colors"
+							className="inline-flex items-center gap-2 font-display font-extrabold text-[18px] px-[34px] py-[19px] rounded-full border-[1.5px] border-[var(--color-line)] scale-100 active:scale-[0.97] hover:border-[var(--color-green)] hover:text-[var(--color-green-deep)] hover:bg-slate-50 transition-all hover:shadow-sm"
 						>
 							Call or SMS
 						</Link>
@@ -106,7 +106,7 @@ export function Hero() {
 					<Hero3DCanvas />
 
 					{/* Chip 1 */}
-					<div className="absolute top-6 -left-[26px] bg-[var(--color-surface)] rounded-[14px] px-[15px] py-3 shadow-[var(--shadow-card)] flex items-center gap-[11px] border border-[var(--color-line)]">
+					<div className="absolute top-6 left-4 sm:-left-[26px] bg-[var(--color-surface)] rounded-[14px] px-[15px] py-3 shadow-[var(--shadow-card)] flex items-center gap-[11px] border border-[var(--color-line)] transition-all">
 						<span className="w-[38px] h-[38px] rounded-[10px] bg-[color-mix(in_srgb,var(--color-green)_14%,transparent)] text-[var(--color-green-deep)] flex items-center justify-center flex-none">
 							<Shield size={20} />
 						</span>
@@ -121,7 +121,7 @@ export function Hero() {
 					</div>
 
 					{/* Chip 2 */}
-					<div className="absolute bottom-7 -right-[22px] bg-[var(--color-surface)] rounded-[14px] px-[15px] py-3 shadow-[var(--shadow-card)] flex items-center gap-[11px] border border-[var(--color-line)]">
+					<div className="absolute bottom-7 right-4 sm:-right-[22px] bg-[var(--color-surface)] rounded-[14px] px-[15px] py-3 shadow-[var(--shadow-card)] flex items-center gap-[11px] border border-[var(--color-line)] transition-all">
 						<span className="w-[38px] h-[38px] rounded-[10px] bg-[color-mix(in_srgb,var(--color-green)_14%,transparent)] text-[var(--color-green-deep)] flex items-center justify-center flex-none">
 							<Clock size={20} />
 						</span>

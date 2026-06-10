@@ -7,7 +7,7 @@ import Link from "next/link";
 export function Header() {
 	return (
 		<header className="sticky top-0 z-60 border-b border-[var(--color-line)] bg-[color-mix(in_srgb,var(--color-bg)_86%,transparent)] backdrop-blur-[12px]">
-			<div className="mx-auto flex max-w-[1180px] items-center justify-between px-6 h-[74px]">
+			<div className="mx-auto flex max-w-7xl items-center justify-between px-6 h-[74px]">
 				<Link
 					href="#top"
 					aria-label="Eco Bin Cleaning home"
@@ -48,7 +48,7 @@ export function Header() {
 					</Link>
 					<Link
 						href="#book"
-						className="inline-flex items-center justify-center gap-2 font-display font-extrabold text-[16px] text-white bg-[var(--color-green)] px-[26px] py-4 rounded-full transition-all hover:-translate-y-0.5 hover:bg-[var(--color-green-deep)] shadow-[0_10px_24px_-8px_color-mix(in_srgb,var(--color-green)_70%,transparent)]"
+						className="inline-flex items-center justify-center gap-2 font-display font-extrabold text-[16px] text-white bg-[var(--color-green)] px-[26px] py-4 rounded-full scale-100 active:scale-[0.97] transition-all hover:-translate-y-0.5 hover:bg-[var(--color-green-deep)] hover:shadow-[0_12px_28px_-6px_rgba(46,154,79,0.35)] shadow-[0_10px_24px_-8px_color-mix(in_srgb,var(--color-green)_70%,transparent)]"
 					>
 						Book Now
 					</Link>

@@ -30,10 +30,10 @@ const faqs = [
 function FAQItem({ q, a }: { q: string; a: string }) {
 	const [open, setOpen] = useState(false);
 	return (
-		<div className="border border-[var(--color-line)] rounded-[14px] bg-[var(--color-surface)] mb-3 overflow-hidden">
+		<div className="border border-[var(--color-line)] rounded-[14px] bg-[var(--color-surface)] mb-3 overflow-hidden hover:border-emerald-500/35 hover:shadow-sm transition-all duration-300 translate-y-0 scale-100">
 			<button
 				onClick={() => setOpen((v) => !v)}
-				className="w-full flex items-center justify-between gap-3 px-6 py-5 font-display font-bold text-[17px] text-left cursor-pointer"
+				className="w-full flex items-center justify-between gap-3 px-6 py-5 font-display font-bold text-[17px] text-left cursor-pointer hover:text-[var(--color-green-deep)] transition-colors"
 				aria-expanded={open}
 			>
 				{q}
@@ -65,7 +65,7 @@ function FAQItem({ q, a }: { q: string; a: string }) {
 export function FAQ() {
 	return (
 		<section className="bg-[var(--color-surface)] border-t border-b border-[var(--color-line)] py-[78px]">
-			<div className="mx-auto max-w-[1180px] px-6">
+			<div className="mx-auto max-w-7xl px-6">
 				<motion.div
 					className="max-w-[720px] mx-auto mb-12 text-center"
 					initial={{ opacity: 0, y: 22 }}

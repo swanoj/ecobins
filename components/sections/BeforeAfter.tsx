@@ -7,7 +7,7 @@ import Image from "next/image";
 export function BeforeAfter() {
 	return (
 		<section className="py-[78px]" id="results">
-			<div className="mx-auto max-w-[1180px] px-6">
+			<div className="mx-auto max-w-7xl px-6">
 				<motion.div
 					className="max-w-[720px] mx-auto mb-12 text-center"
 					initial={{ opacity: 0, y: 22 }}
@@ -28,14 +28,14 @@ export function BeforeAfter() {
 				</motion.div>
 
 				<motion.div
-					className="relative grid grid-cols-2 gap-6 max-w-[1000px] mx-auto"
+					className="relative grid grid-cols-1 md:grid-cols-2 gap-6 max-w-[1000px] mx-auto"
 					initial={{ opacity: 0, y: 22 }}
 					whileInView={{ opacity: 1, y: 0 }}
 					viewport={{ once: true }}
 					transition={{ duration: 0.6 }}
 				>
 					<div className="relative rounded-[18px] overflow-hidden shadow-[var(--shadow-card)]">
-						<div className="relative w-full h-[420px]">
+						<div className="relative w-full h-[280px] sm:h-[360px] md:h-[420px]">
 							<Image
 								src="/assets/eco-bin-cleaning-tarneit.png"
 								alt="Dirty bin before cleaning"
@@ -49,7 +49,7 @@ export function BeforeAfter() {
 					</div>
 
 					<div className="relative rounded-[18px] overflow-hidden shadow-[var(--shadow-card)]">
-						<div className="relative w-full h-[420px]">
+						<div className="relative w-full h-[280px] sm:h-[360px] md:h-[420px]">
 							<Image
 								src="/assets/clean-bin.jpg"
 								alt="Clean bin after service"

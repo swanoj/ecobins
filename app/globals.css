@@ -54,3 +54,8 @@
 		max-width: 100%;
 	}
 }
+
+/* Google Maps InfoWindow Click-Through Bypass to prevent blocking underlying polygons */
+.gm-style-iw-c, .gm-style-iw, .gm-style-iw-t, .gm-style-iw-d {
+	pointer-events: none !important;
+}

@@ -9,6 +9,7 @@ import { Hero } from "@/components/sections/Hero";
 import { HowItWorks } from "@/components/sections/HowItWorks";
 import { MobileCTA } from "@/components/sections/MobileCTA";
 import { ProcessBand } from "@/components/sections/ProcessBand";
+import { FleetAndCrew } from "@/components/sections/FleetAndCrew";
 import { ServiceArea } from "@/components/sections/ServiceArea";
 import { Testimonials } from "@/components/sections/Testimonials";
 import { UrgencyBanner } from "@/components/sections/UrgencyBanner";
@@ -24,6 +25,7 @@ export default function Home() {
 				<BeforeAfter />
 				<HowItWorks />
 				<ProcessBand />
+				<FleetAndCrew />
 				<WhyEco />
 				<Testimonials />
 				<BookingWizard />

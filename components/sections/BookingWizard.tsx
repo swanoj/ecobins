@@ -382,36 +382,36 @@ function StepPostcode({ data, update, onNext }: StepProps) {
 				zoomControl: true,
 				gestureHandling: "cooperative",
 				styles: [
-					{ elementType: "geometry", stylers: [{ color: "#090d16" }] },
-					{ elementType: "labels.text.fill", stylers: [{ color: "#94a3b8" }] },
+					{ elementType: "geometry", stylers: [{ color: "#f8fafc" }] }, // soft grey-slate land
+					{ elementType: "labels.text.fill", stylers: [{ color: "#334155" }] }, // crisp slate labels
 					{
 						elementType: "labels.text.stroke",
-						stylers: [{ color: "#090d16" }],
+						stylers: [{ color: "#ffffff" }], // clean white outlines for labels
 					},
 					{
 						featureType: "water",
 						elementType: "geometry",
-						stylers: [{ color: "#111827" }],
+						stylers: [{ color: "#e0f2fe" }], // soft sky-blue water
 					},
 					{
 						featureType: "road",
 						elementType: "geometry",
-						stylers: [{ color: "#1e293b" }],
+						stylers: [{ color: "#ffffff" }], // clean white roads
 					},
 					{
 						featureType: "road.arterial",
 						elementType: "geometry",
-						stylers: [{ color: "#1e293b" }],
+						stylers: [{ color: "#ffffff" }],
 					},
 					{
 						featureType: "road.highway",
 						elementType: "geometry",
-						stylers: [{ color: "#334155" }],
+						stylers: [{ color: "#cbd5e1" }], // soft grey highways
 					},
 					{
 						featureType: "administrative.locality",
 						elementType: "labels.text.fill",
-						stylers: [{ color: "#cbd5e1" }],
+						stylers: [{ color: "#1e293b" }],
 					},
 					{ featureType: "poi", stylers: [{ visibility: "off" }] },
 					{ featureType: "transit", stylers: [{ visibility: "off" }] },
@@ -421,15 +421,16 @@ function StepPostcode({ data, update, onNext }: StepProps) {
 			mapRef.current = map;
 			infoRef.current = new window.google.maps.InfoWindow({
 				disableAutoPan: true,
+				pixelOffset: new window.google.maps.Size(0, -12),
 			});
 
 			map.data.addGeoJson(geoData);
 			map.data.setStyle({
-				fillColor: "#22c55e",
-				fillOpacity: 0.06,
-				strokeColor: "#22c55e",
-				strokeWeight: 1.5,
-				strokeOpacity: 0.4,
+				fillColor: "#10b981", // emerald-500 base
+				fillOpacity: 0.08,
+				strokeColor: "#10b981",
+				strokeWeight: 1.8,
+				strokeOpacity: 0.45,
 				cursor: "pointer",
 			});
 
@@ -437,30 +438,35 @@ function StepPostcode({ data, update, onNext }: StepProps) {
 				const pc = e.feature.getProperty("POA_CODE21") as string;
 				const sel = pc === selectedRef.current;
 				map.data.overrideStyle(e.feature, {
-					strokeColor: sel ? "#22c55e" : "#4ade80",
-					strokeWeight: sel ? 4.5 : 3.5,
-					strokeOpacity: sel ? 1.0 : 0.9,
-					fillOpacity: sel ? 0.45 : 0.22,
+					strokeColor: sel ? "#10b981" : "#34d399", // mint green hover
+					strokeWeight: sel ? 6.0 : 4.5, // much thicker on hover for easier click visibility
+					strokeOpacity: 1.0,
+					fillOpacity: sel ? 0.45 : 0.28,
 				});
 				const info = POSTCODE_COUNCIL[pc];
 				if (infoRef.current && e.latLng) {
 					infoRef.current.setContent(
 						`<div style="` +
-							`background: #0f172a;` +
-							`border: 1px solid rgba(74, 222, 128, 0.4);` +
+							`background: rgba(255, 255, 255, 0.98);` +
+							`border: 1.5px solid rgba(16, 185, 129, 0.45);` +
 							`padding: 10px 14px;` +
 							`border-radius: 12px;` +
-							`color: #f8fafc;` +
-							`font-family: var(--font-hanken), system-ui, sans-serif;` +
-							`box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 0 15px rgba(34, 197, 94, 0.15);` +
-							`min-width: 140px;` +
+							`color: #1e293b;` +
+							`font-family: var(--font-body), system-ui, sans-serif;` +
+							`box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.03);` +
+							`min-width: 170px;` +
 							`font-size: 13px;` +
-							`line-height: 1.4;` +
+							`line-height: 1.45;` +
 							`display: inline-block;` +
 							`text-align: left;` +
+							`transition: all 0.2s ease;` +
 							`">` +
-							`<div style="font-weight: 700; font-size: 14px; color: #4ade80; margin-bottom: 2px;">${info?.suburb ?? pc}</div>` +
-							`<div style="font-weight: 500; font-size: 11px; color: #94a3b8;">Postcode ${pc} · <span style="color: #38bdf8; font-weight: 600;">click to select</span></div>` +
+							`<div style="font-weight: 800; font-family: var(--font-display); font-size: 15px; color: #1f7a3d; margin-bottom: 3px; letter-spacing: -0.01em;">${info?.suburb ?? pc}</div>` +
+							`<div style="font-weight: 600; font-size: 11px; color: #64748b; display: flex; align-items: center; gap: 4px;">` +
+							`<span>Postcode ${pc}</span>` +
+							`<span style="color: rgba(0,0,0,0.1)">•</span>` +
+							`<span style="color: #2e9a4f; font-weight: 700;">click to select</span>` +
+							`</div>` +
 							`</div>`,
 					);
 					infoRef.current.setPosition(e.latLng);
@@ -480,6 +486,25 @@ function StepPostcode({ data, update, onNext }: StepProps) {
 				if (info?.confidence === "high")
 					updateRef.current("binday", info.suggestedBinDay);
 				else updateRef.current("binday", "");
+
+				// Smooth cinematic pan-and-zoom transition on click
+				if (e.latLng) {
+					const geom = e.feature.getGeometry();
+					if (geom) {
+						const bounds = new window.google.maps.LatLngBounds();
+						geom.forEachLatLng((latLng) => {
+							bounds.extend(latLng);
+						});
+						map.panTo(bounds.getCenter());
+					} else {
+						map.panTo(e.latLng);
+					}
+
+					const curZoom = map.getZoom();
+					if (typeof curZoom === "number" && curZoom < 11) {
+						map.setZoom(11);
+					}
+				}
 			});
 
 			if (!cancelled) setMapStatus("ready");
@@ -498,11 +523,11 @@ function StepPostcode({ data, update, onNext }: StepProps) {
 			const pc = feature.getProperty("POA_CODE21") as string;
 			const sel = pc === data.postcode;
 			return {
-				fillColor: "#22c55e",
-				fillOpacity: sel ? 0.35 : 0.06,
-				strokeColor: "#22c55e",
-				strokeWeight: sel ? 4.5 : 1.5,
-				strokeOpacity: sel ? 1.0 : 0.4,
+				fillColor: "#10b981", // emerald-500
+				fillOpacity: sel ? 0.45 : 0.08,
+				strokeColor: "#10b981",
+				strokeWeight: sel ? 6.0 : 1.8,
+				strokeOpacity: sel ? 1.0 : 0.45,
 				cursor: "pointer",
 			};
 		});
@@ -532,40 +557,43 @@ function StepPostcode({ data, update, onNext }: StepProps) {
 
 			{/* Full-width map with floating postcode bubble */}
 			<div
-				className="relative rounded-[16px] overflow-hidden border border-[var(--color-line)] mb-4"
-				style={{ height: "380px" }}
+				className="relative rounded-[24px] p-1 overflow-hidden border border-slate-200 bg-white shadow-[0_12px_40px_rgba(0,0,0,0.06)] mb-4"
+				style={{ height: "420px" }}
 			>
-				<div ref={mapDivRef} className="w-full h-full" />
+				<div
+					ref={mapDivRef}
+					className="w-full h-full rounded-[20px] overflow-hidden"
+				/>
 
 				{mapStatus === "loading" && (
-					<div className="absolute inset-0 flex items-center justify-center bg-slate-50 pointer-events-none">
-						<p className="text-[13px] text-[var(--color-muted)]">
-							Loading map…
+					<div className="absolute inset-1 rounded-[20px] flex items-center justify-center bg-slate-50/95 pointer-events-none">
+						<p className="text-[13px] text-slate-500">
+							Loading interactive service map...
 						</p>
 					</div>
 				)}
 				{mapStatus === "error" && (
-					<div className="absolute inset-0 flex items-center justify-center bg-slate-50 pointer-events-none">
-						<p className="text-[13px] text-[var(--color-muted)]">
+					<div className="absolute inset-1 rounded-[20px] flex items-center justify-center bg-slate-50/95 pointer-events-none">
+						<p className="text-[13px] text-slate-500">
 							Map unavailable — type your postcode below
 						</p>
 					</div>
 				)}
 
 				{/* Floating postcode input bubble */}
-				<div className="absolute bottom-3 left-3 right-3">
+				<div className="absolute bottom-4 left-4 right-4 z-10">
 					<div
-						className={`flex items-center gap-3 rounded-[14px] px-4 py-3 backdrop-blur-sm transition-all duration-200 ${
+						className={`flex items-center gap-3 rounded-[16px] px-4.5 py-3.5 transition-all duration-300 ${
 							isValid
-								? "bg-white/95 border-[1.5px] border-[var(--color-green)] shadow-[0_4px_20px_-4px_rgba(0,0,0,0.18)]"
+								? "bg-white border-2 border-emerald-500 shadow-[0_12px_32px_rgba(16,185,129,0.12)]"
 								: isInvalid
-									? "bg-white/95 border-[1.5px] border-red-400 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.18)]"
-									: "bg-white/90 border border-white/70 shadow-[0_4px_16px_-4px_rgba(0,0,0,0.12)]"
+									? "bg-white border-2 border-red-500 shadow-[0_12px_32px_rgba(239,68,68,0.12)]"
+									: "bg-white border border-slate-200 shadow-[0_12px_32px_rgba(0,0,0,0.06)]"
 						}`}
 					>
 						<MapPin
-							size={16}
-							className={`flex-none transition-colors ${isValid ? "text-[var(--color-green)]" : "text-[var(--color-muted)]"}`}
+							size={18}
+							className={`flex-none transition-colors ${isValid ? "text-emerald-500" : "text-slate-400"}`}
 						/>
 						<input
 							type="text"
@@ -574,8 +602,8 @@ function StepPostcode({ data, update, onNext }: StepProps) {
 							value={data.postcode}
 							onChange={(e) => handlePostcodeChange(e.target.value)}
 							onBlur={() => setTouched(true)}
-							placeholder="Type postcode or click a suburb…"
-							className="flex-1 min-w-0 bg-transparent font-body text-[15px] font-bold tracking-wider outline-none text-[var(--color-ink)] placeholder:font-normal placeholder:text-[var(--color-muted)] placeholder:tracking-normal"
+							placeholder="Type postcode or click your suburb..."
+							className="flex-1 min-w-0 bg-transparent font-body text-[15px] font-bold tracking-wider outline-none text-slate-800 placeholder:font-normal placeholder:text-slate-400 placeholder:tracking-normal"
 						/>
 						<AnimatePresence mode="wait">
 							{isValid && council && (
@@ -586,13 +614,10 @@ function StepPostcode({ data, update, onNext }: StepProps) {
 									exit={{ opacity: 0 }}
 									className="flex items-center gap-2 flex-none"
 								>
-									<span className="text-[13px] text-[var(--color-muted)] hidden sm:block truncate max-w-[140px]">
+									<span className="text-[13px] font-semibold text-slate-600 hidden sm:block truncate max-w-[140px]">
 										{council.suburb}
 									</span>
-									<CheckCircle2
-										size={18}
-										className="text-[var(--color-green)]"
-									/>
+									<CheckCircle2 size={18} className="text-emerald-500" />
 								</motion.div>
 							)}
 							{isInvalid && (
@@ -603,7 +628,7 @@ function StepPostcode({ data, update, onNext }: StepProps) {
 									exit={{ opacity: 0 }}
 									className="flex-none"
 								>
-									<span className="text-[12px] text-red-500 font-semibold whitespace-nowrap">
+									<span className="text-[12px] text-red-500 font-bold whitespace-nowrap">
 										Not in service area
 									</span>
 								</motion.div>
@@ -1398,7 +1423,7 @@ export function BookingWizard() {
 			className="py-[78px] bg-[linear-gradient(135deg,#0C3A52_0%,#14708e_55%,#1E9466_100%)]"
 			id="book"
 		>
-			<div className="mx-auto max-w-[1180px] px-6 grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-[54px] items-start">
+			<div className="mx-auto max-w-7xl px-6 grid grid-cols-1 lg:grid-cols-[1fr_1.35fr] gap-[54px] items-start">
 				{/* Left — sell copy */}
 				<div className="text-white pt-2 lg:sticky lg:top-28">
 					<span className="inline-flex items-center gap-2 font-body font-bold text-[13px] tracking-[.14em] uppercase text-[var(--color-lime)]">

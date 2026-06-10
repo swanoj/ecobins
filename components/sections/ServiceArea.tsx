@@ -22,7 +22,7 @@ const suburbs = [
 export function ServiceArea() {
 	return (
 		<section className="py-[78px]">
-			<div className="mx-auto max-w-[1180px] px-6">
+			<div className="mx-auto max-w-7xl px-6">
 				<motion.div
 					className="max-w-[720px] mx-auto mb-12 text-center"
 					initial={{ opacity: 0, y: 22 }}
@@ -54,10 +54,10 @@ export function ServiceArea() {
 						<span
 							key={name}
 							className={cn(
-								"border rounded-full px-[18px] py-[9px] font-semibold text-[14px]",
+								"border rounded-full px-[18px] py-[9px] font-semibold text-[14px] transition-all duration-300 scale-100 active:scale-[0.96] hover:scale-105 hover:shadow-sm cursor-default",
 								hot
-									? "bg-[var(--color-green)] text-white border-[var(--color-green)]"
-									: "bg-[var(--color-surface)] border-[var(--color-line)]",
+									? "bg-[var(--color-green)] text-white border-[var(--color-green)] hover:bg-[var(--color-green-deep)]"
+									: "bg-[var(--color-surface)] border-[var(--color-line)] hover:border-emerald-500/40 hover:bg-emerald-50/10",
 							)}
 						>
 							{name}

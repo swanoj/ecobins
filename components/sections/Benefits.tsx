@@ -32,7 +32,7 @@ export function Benefits() {
 			className="bg-[var(--color-surface)] border-t border-b border-[var(--color-line)] py-[78px]"
 			id="offer"
 		>
-			<div className="mx-auto max-w-[1180px] px-6">
+			<div className="mx-auto max-w-7xl px-6">
 				<motion.div
 					className="max-w-[720px] mx-auto mb-12 text-center"
 					initial={{ opacity: 0, y: 22 }}
@@ -57,7 +57,7 @@ export function Benefits() {
 					{benefits.map(({ icon: Icon, title, desc }, i) => (
 						<motion.div
 							key={title}
-							className="bg-[var(--color-surface-2)] border border-[var(--color-line)] rounded-[18px] p-7"
+							className="bg-[var(--color-surface-2)] border border-[var(--color-line)] hover:border-emerald-500/35 hover:-translate-y-1 hover:shadow-[0_12px_30px_-8px_rgba(46,154,79,0.12)] rounded-[18px] p-7 transition-all duration-300 translate-y-0 scale-100"
 							initial={{ opacity: 0, y: 22 }}
 							whileInView={{ opacity: 1, y: 0 }}
 							viewport={{ once: true }}

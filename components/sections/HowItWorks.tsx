@@ -26,7 +26,7 @@ export function HowItWorks() {
 			className="bg-[var(--color-surface)] border-t border-b border-[var(--color-line)] py-[78px]"
 			id="how"
 		>
-			<div className="mx-auto max-w-[1180px] px-6">
+			<div className="mx-auto max-w-7xl px-6">
 				<motion.div
 					className="max-w-[720px] mx-auto mb-12 text-center"
 					initial={{ opacity: 0, y: 22 }}
@@ -49,7 +49,7 @@ export function HowItWorks() {
 					{steps.map(({ n, title, desc }, i) => (
 						<motion.div
 							key={n}
-							className="bg-[var(--color-surface-2)] border border-[var(--color-line)] rounded-[18px] p-[30px] relative"
+							className="bg-[var(--color-surface-2)] border border-[var(--color-line)] hover:border-emerald-500/30 hover:scale-[1.02] hover:shadow-md rounded-[18px] p-[30px] relative transition-all duration-300 translate-y-0 scale-100"
 							initial={{ opacity: 0, y: 22 }}
 							whileInView={{ opacity: 1, y: 0 }}
 							viewport={{ once: true }}
