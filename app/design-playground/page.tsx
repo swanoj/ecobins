@@ -31,7 +31,13 @@ import {
   Eye,
   Layout,
   Paintbrush,
-  Activity
+  Activity,
+  Sunrise,
+  Sun,
+  Sunset,
+  Moon,
+  Compass,
+  Waves
 } from "lucide-react";
 
 // Default Theatre.js pre-choreographed keyframe state string to initialize without JSON file fetch
@@ -227,6 +233,736 @@ export default function DesignPlayground() {
     }
   };
 
+  // ── EXPERIENTIAL AUDIO-VISUAL STATES ──────────────────────────────────────
+  const [playingTrack, setPlayingTrack] = useState<number | null>(null);
+  const [globalMasterPlaying, setGlobalMasterPlaying] = useState(false);
+  const soundboardTracks = [
+    { id: 1, name: "David M.", area: "Tarneit Resident", text: "FOGO smells went away in 10 mins. Brilliant service!", dur: "0:24" },
+    { id: 2, name: "Jessica R.", area: "Hoppers Crossing Mum", text: "Perfect fortnightly timing right after bins get emptied.", dur: "0:31" },
+    { id: 3, name: "Liam G.", area: "Truganina Resident", text: "No more maggots in my green lid bin. Unbelievable!", dur: "0:19" },
+    { id: 4, name: "Sarah K.", area: "Point Cook Beach", text: "Our bin was clean enough to eat out of. Smells like lime.", dur: "0:42" },
+    { id: 5, name: "Sanjay P.", area: "Werribee Business", text: "Reliable, local, same-day, and they roll it inside our gate.", dur: "0:28" }
+  ];
+
+  const [ambientTime, setAmbientTime] = useState<'dawn' | 'noon' | 'sunset' | 'midnight'>('noon');
+  const [ambientActive, setAmbientActive] = useState(false);
+  const [liquidSweepActive, setLiquidSweepActive] = useState(false);
+  const [liquidSweepProgress, setLiquidSweepProgress] = useState(0);
+  const [vocalFrequencyArray, setVocalFrequencyArray] = useState<number[]>(new Array(16).fill(0));
+  const [experientialConsoleExpanded, setExperientialConsoleExpanded] = useState(true);
+
+  const particleCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const webglCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  // Web Audio Synth references
+  const audioCtxRef = useRef<AudioContext | null>(null);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const synthNodesRef = useRef<{
+    humOsc?: OscillatorNode;
+    humGain?: GainNode;
+    noiseSource?: AudioBufferSourceNode;
+    noiseFilter?: BiquadFilterNode;
+    noiseGain?: GainNode;
+    chimeOsc?: OscillatorNode;
+    chimeGain?: GainNode;
+    chimeTimer?: any;
+    lfo?: OscillatorNode;
+    lfoGain?: GainNode;
+  }>({});
+
+  // Peak chime trigger helper
+  const triggerPeakChime = () => {
+    let audioCtx = audioCtxRef.current;
+    if (!audioCtx) {
+      const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtxClass) {
+        audioCtx = new AudioCtxClass();
+        audioCtxRef.current = audioCtx;
+      }
+    }
+    if (audioCtx) {
+      if (audioCtx.state === "suspended") audioCtx.resume();
+      try {
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = "sine";
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime); // high pure A chime
+        gain.gain.setValueAtTime(0, audioCtx.currentTime);
+        gain.gain.linearRampToValueAtTime(0.12, audioCtx.currentTime + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + 1.8);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        setTimeout(() => {
+          try {
+            osc.stop();
+            osc.disconnect();
+            gain.disconnect();
+          } catch (e) {}
+        }, 2000);
+      } catch (err) {}
+    }
+  };
+
+  const startLiquidSweep = () => {
+    if (liquidSweepActive) return;
+    setLiquidSweepActive(true);
+  };
+
+  const onLiquidSweepPeak = () => {
+    // Reset kinetic typography states!
+    runDecryptSolver("SANITISED IN 10 MINUTES");
+    setScrambleText("AWWWARDS CLASS");
+    setRevealKey(prev => prev + 1);
+    setSplineOffset(0);
+    triggerPeakChime();
+  };
+
+  // ── Web Audio Synth + Spectrum Analyser Effect ──
+  useEffect(() => {
+    if (playingTrack === null && !globalMasterPlaying) {
+      try {
+        const nodes = synthNodesRef.current;
+        if (nodes.humOsc) { nodes.humOsc.stop(); nodes.humOsc.disconnect(); }
+        if (nodes.noiseSource) { nodes.noiseSource.stop(); nodes.noiseSource.disconnect(); }
+        if (nodes.chimeOsc) { nodes.chimeOsc.stop(); nodes.chimeOsc.disconnect(); }
+        if (nodes.lfo) { nodes.lfo.stop(); nodes.lfo.disconnect(); }
+        if (nodes.humGain) nodes.humGain.disconnect();
+        if (nodes.noiseGain) nodes.noiseGain.disconnect();
+        if (nodes.chimeGain) nodes.chimeGain.disconnect();
+        if (nodes.noiseFilter) nodes.noiseFilter.disconnect();
+        if (nodes.lfoGain) nodes.lfoGain.disconnect();
+        if (nodes.chimeTimer) clearInterval(nodes.chimeTimer);
+        
+        synthNodesRef.current = {};
+      } catch (e) {
+        console.warn("Error stopping audio nodes: ", e);
+      }
+
+      let decayActive = true;
+      const decayTick = () => {
+        if (!decayActive) return;
+        setVocalFrequencyArray((prev) => {
+          const next = prev.map((val) => val * 0.82);
+          if (next.every((val) => val < 0.1)) {
+            decayActive = false;
+            return new Array(16).fill(0);
+          }
+          return next;
+        });
+        if (decayActive) {
+          requestAnimationFrame(decayTick);
+        }
+      };
+      decayTick();
+      return () => {
+        decayActive = false;
+      };
+    }
+
+    let audioCtx = audioCtxRef.current;
+    if (!audioCtx) {
+      const AudioCtxClass = window.AudioContext || (window as any).webkitAudioContext;
+      if (AudioCtxClass) {
+        audioCtx = new AudioCtxClass();
+        audioCtxRef.current = audioCtx;
+      }
+    }
+
+    if (!audioCtx) return;
+
+    if (audioCtx.state === "suspended") {
+      audioCtx.resume();
+    }
+
+    let analyser = analyserRef.current;
+    if (!analyser) {
+      analyser = audioCtx.createAnalyser();
+      analyser.fftSize = 128;
+      analyserRef.current = analyser;
+    }
+
+    analyser.connect(audioCtx.destination);
+
+    try {
+      const nodes = synthNodesRef.current;
+      if (nodes.humOsc) { nodes.humOsc.stop(); nodes.humOsc.disconnect(); }
+      if (nodes.noiseSource) { nodes.noiseSource.stop(); nodes.noiseSource.disconnect(); }
+      if (nodes.chimeOsc) { nodes.chimeOsc.stop(); nodes.chimeOsc.disconnect(); }
+      if (nodes.lfo) { nodes.lfo.stop(); nodes.lfo.disconnect(); }
+      if (nodes.chimeTimer) clearInterval(nodes.chimeTimer);
+      synthNodesRef.current = {};
+    } catch (e) {}
+
+    let humFreq = 65.41;
+    let chimeFreq = 1046.50;
+    let lfoRate = 0.4;
+    let noiseVolume = 0.04;
+    let humVolume = 0.12;
+
+    if (playingTrack !== null) {
+      const activeTrack = soundboardTracks.find(t => t.id === playingTrack);
+      if (activeTrack) {
+        switch (activeTrack.id) {
+          case 1:
+            humFreq = 77.78;
+            chimeFreq = 1244.51;
+            lfoRate = 0.55;
+            noiseVolume = 0.07;
+            break;
+          case 2:
+            humFreq = 103.83;
+            chimeFreq = 1661.22;
+            lfoRate = 0.35;
+            noiseVolume = 0.05;
+            break;
+          case 3:
+            humFreq = 116.54;
+            chimeFreq = 1864.66;
+            lfoRate = 0.72;
+            noiseVolume = 0.08;
+            break;
+          case 4:
+            humFreq = 130.81;
+            chimeFreq = 2093.00;
+            lfoRate = 0.28;
+            noiseVolume = 0.06;
+            break;
+          case 5:
+            humFreq = 87.31;
+            chimeFreq = 1396.91;
+            lfoRate = 0.90;
+            noiseVolume = 0.11;
+            break;
+        }
+      }
+    } else if (globalMasterPlaying) {
+      humFreq = 65.41;
+      chimeFreq = 1046.50;
+      lfoRate = 0.45;
+      noiseVolume = 0.05;
+      humVolume = 0.08;
+    }
+
+    const humOsc = audioCtx.createOscillator();
+    humOsc.type = "triangle";
+    humOsc.frequency.setValueAtTime(humFreq, audioCtx.currentTime);
+
+    const humGain = audioCtx.createGain();
+    humGain.gain.setValueAtTime(humVolume, audioCtx.currentTime);
+
+    const lfo = audioCtx.createOscillator();
+    lfo.type = "sine";
+    lfo.frequency.setValueAtTime(lfoRate, audioCtx.currentTime);
+
+    const lfoGain = audioCtx.createGain();
+    lfoGain.gain.setValueAtTime(0.04, audioCtx.currentTime);
+
+    lfo.connect(lfoGain);
+    lfoGain.connect(humGain.gain);
+
+    humOsc.connect(humGain);
+    humGain.connect(analyser);
+
+    const noiseBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 2, audioCtx.sampleRate);
+    const output = noiseBuffer.getChannelData(0);
+    for (let i = 0; i < noiseBuffer.length; i++) {
+      output[i] = Math.random() * 2 - 1;
+    }
+    const noiseSource = audioCtx.createBufferSource();
+    noiseSource.buffer = noiseBuffer;
+    noiseSource.loop = true;
+
+    const noiseFilter = audioCtx.createBiquadFilter();
+    noiseFilter.type = "bandpass";
+    noiseFilter.Q.setValueAtTime(2.5, audioCtx.currentTime);
+    noiseFilter.frequency.setValueAtTime(450, audioCtx.currentTime);
+
+    const noiseGain = audioCtx.createGain();
+    noiseGain.gain.setValueAtTime(noiseVolume, audioCtx.currentTime);
+
+    noiseSource.connect(noiseFilter);
+    noiseFilter.connect(noiseGain);
+    noiseGain.connect(analyser);
+
+    humOsc.start(0);
+    lfo.start(0);
+    noiseSource.start(0);
+
+    synthNodesRef.current = {
+      humOsc,
+      humGain,
+      noiseSource,
+      noiseFilter,
+      noiseGain,
+      lfo,
+      lfoGain
+    };
+
+    let filterSweepDirection = 1;
+    let currentFilterFreq = 450;
+    const filterSweepInterval = setInterval(() => {
+      if (!audioCtxRef.current || !synthNodesRef.current.noiseFilter) return;
+      currentFilterFreq += filterSweepDirection * 18;
+      if (currentFilterFreq > 950) filterSweepDirection = -1;
+      if (currentFilterFreq < 300) filterSweepDirection = 1;
+      
+      synthNodesRef.current.noiseFilter.frequency.setValueAtTime(currentFilterFreq, audioCtxRef.current.currentTime);
+    }, 45);
+
+    const triggerChimeInstance = () => {
+      if (!audioCtxRef.current || !analyserRef.current) return;
+      try {
+        const chimeOsc = audioCtxRef.current.createOscillator();
+        chimeOsc.type = "sine";
+        chimeOsc.frequency.setValueAtTime(chimeFreq + (Math.random() - 0.5) * 80, audioCtxRef.current.currentTime);
+
+        const chimeGain = audioCtxRef.current.createGain();
+        chimeGain.gain.setValueAtTime(0.0, audioCtxRef.current.currentTime);
+        chimeGain.gain.linearRampToValueAtTime(0.09, audioCtxRef.current.currentTime + 0.05);
+        chimeGain.gain.exponentialRampToValueAtTime(0.0001, audioCtxRef.current.currentTime + 1.2);
+
+        chimeOsc.connect(chimeGain);
+        chimeGain.connect(analyserRef.current);
+        chimeOsc.start(0);
+
+        setTimeout(() => {
+          try {
+            chimeOsc.stop();
+            chimeOsc.disconnect();
+            chimeGain.disconnect();
+          } catch(err) {}
+        }, 1300);
+      } catch (err) {}
+    };
+
+    triggerChimeInstance();
+    const chimeTimer = setInterval(triggerChimeInstance, 2400);
+    synthNodesRef.current.chimeTimer = chimeTimer;
+
+    let animationFrameId: number;
+    const bufferLength = analyser.frequencyBinCount;
+    const dataArray = new Uint8Array(bufferLength);
+
+    const updateAnalyserData = () => {
+      if (!analyserRef.current) return;
+      analyserRef.current.getByteFrequencyData(dataArray);
+
+      const newAmplitudes = new Array(16).fill(0);
+      const binsPerChannel = Math.floor(bufferLength / 16);
+
+      for (let i = 0; i < 16; i++) {
+        let sum = 0;
+        for (let j = 0; j < binsPerChannel; j++) {
+          sum += dataArray[i * binsPerChannel + j];
+        }
+        newAmplitudes[i] = sum / binsPerChannel;
+      }
+
+      setVocalFrequencyArray(newAmplitudes);
+      animationFrameId = requestAnimationFrame(updateAnalyserData);
+    };
+
+    updateAnalyserData();
+
+    return () => {
+      clearInterval(filterSweepInterval);
+      if (chimeTimer) clearInterval(chimeTimer);
+      cancelAnimationFrame(animationFrameId);
+    };
+  }, [playingTrack, globalMasterPlaying]);
+
+  // ── WebGL Screen-Sweep Shader Effect ──
+  useEffect(() => {
+    if (!liquidSweepActive) return;
+
+    const canvas = webglCanvasRef.current;
+    if (!canvas) return;
+
+    const gl = canvas.getContext("webgl") || canvas.getContext("experimental-webgl") as WebGLRenderingContext;
+    if (!gl) {
+      console.error("WebGL not supported, falling back.");
+      onLiquidSweepPeak();
+      setLiquidSweepActive(false);
+      return;
+    }
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      gl.viewport(0, 0, canvas.width, canvas.height);
+    };
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    const vsSource = `
+      attribute vec2 position;
+      varying vec2 vUv;
+      void main() {
+        vUv = position * 0.5 + 0.5;
+        vUv.y = 1.0 - vUv.y;
+        gl_Position = vec4(position, 0.0, 1.0);
+      }
+    `;
+
+    const fsSource = `
+      precision mediump float;
+      varying vec2 vUv;
+      uniform float uProgress;
+      uniform float uTime;
+      uniform vec2 uResolution;
+
+      void main() {
+        float sweepY = -0.2 + uProgress * 1.4;
+        float wave = sin(vUv.x * 14.0 + uTime * 6.0) * 0.07 + sweepY;
+        float edgeWidth = 0.02;
+        float distToWave = vUv.y - wave;
+
+        if (distToWave < 0.0) {
+          gl_FragColor = vec4(0.0, 0.0, 0.0, 0.0);
+        } else if (distToWave < edgeWidth) {
+          float edgeAlpha = 1.0 - (distToWave / edgeWidth);
+          vec3 edgeColor = mix(vec3(0.18, 0.85, 0.45), vec3(1.0, 1.0, 1.0), edgeAlpha * 0.5);
+          gl_FragColor = vec4(edgeColor, edgeAlpha * 0.95);
+        } else {
+          float depth = clamp((distToWave - edgeWidth) * 3.5, 0.0, 1.0);
+          vec3 waterBaseColor = vec3(0.04, 0.38, 0.22);
+          vec3 waterTopColor = vec3(0.08, 0.65, 0.38);
+          vec3 color = mix(waterTopColor, waterBaseColor, depth);
+          float ripples = sin(vUv.x * 32.0 + vUv.y * 32.0 - uTime * 12.0) * 0.05 + 0.95;
+          color *= ripples;
+          float fade = 1.0 - clamp((distToWave - 0.2) * 1.5, 0.0, 0.8);
+          gl_FragColor = vec4(color, fade * 0.75);
+        }
+      }
+    `;
+
+    const compileShader = (source: string, type: number): WebGLShader | null => {
+      const shader = gl.createShader(type);
+      if (!shader) return null;
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        console.error("Shader compile error: ", gl.getShaderInfoLog(shader));
+        gl.deleteShader(shader);
+        return null;
+      }
+      return shader;
+    };
+
+    const vs = compileShader(vsSource, gl.VERTEX_SHADER);
+    const fs = compileShader(fsSource, gl.FRAGMENT_SHADER);
+    if (!vs || !fs) return;
+
+    const program = gl.createProgram();
+    if (!program) return;
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+
+    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+      console.error("WebGL program link error: ", gl.getProgramInfoLog(program));
+      return;
+    }
+
+    gl.useProgram(program);
+
+    const vertices = new Float32Array([
+      -1, -1,
+       1, -1,
+      -1,  1,
+      -1,  1,
+       1, -1,
+       1,  1,
+    ]);
+
+    const buffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+    gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
+
+    const positionLoc = gl.getAttribLocation(program, "position");
+    gl.enableVertexAttribArray(positionLoc);
+    gl.vertexAttribPointer(positionLoc, 2, gl.FLOAT, false, 0, 0);
+
+    const uProgressLoc = gl.getUniformLocation(program, "uProgress");
+    const uTimeLoc = gl.getUniformLocation(program, "uTime");
+    const uResolutionLoc = gl.getUniformLocation(program, "uResolution");
+
+    let progress = 0;
+    let time = 0;
+    let peakTriggered = false;
+    let animationFrame: number;
+
+    const render = () => {
+      time += 0.035;
+      progress += 0.0125;
+
+      gl.uniform1f(uProgressLoc, progress);
+      gl.uniform1f(uTimeLoc, time);
+      gl.uniform2f(uResolutionLoc, canvas.width, canvas.height);
+
+      if (progress >= 0.5 && !peakTriggered) {
+        peakTriggered = true;
+        onLiquidSweepPeak();
+      }
+
+      setLiquidSweepProgress(progress);
+
+      gl.clearColor(0, 0, 0, 0);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+      gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+      if (progress < 1.0) {
+        animationFrame = requestAnimationFrame(render);
+      } else {
+        setLiquidSweepActive(false);
+        setLiquidSweepProgress(0);
+      }
+    };
+
+    render();
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+      cancelAnimationFrame(animationFrame);
+      try {
+        gl.deleteBuffer(buffer);
+        gl.deleteProgram(program);
+        gl.deleteShader(vs);
+        gl.deleteShader(fs);
+      } catch (err) {}
+    };
+  }, [liquidSweepActive]);
+
+  // ── Ambient Background Particle Emitter Effect ──
+  useEffect(() => {
+    if (!ambientActive) return;
+
+    const canvas = particleCanvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let animationFrame: number;
+    let particles: any[] = [];
+
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resizeCanvas();
+    window.addEventListener("resize", resizeCanvas);
+
+    const createParticle = (initBottom = false) => {
+      const width = canvas.width;
+      const height = canvas.height;
+
+      switch (ambientTime) {
+        case "dawn":
+          return {
+            x: Math.random() * width,
+            y: initBottom ? height + 100 : Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.4,
+            vy: -Math.random() * 0.6 - 0.3,
+            size: Math.random() * 80 + 60,
+            opacity: 0,
+            maxOpacity: Math.random() * 0.12 + 0.05,
+            color: "200, 220, 230",
+            type: "vapor",
+            life: 0,
+            maxLife: Math.random() * 1000 + 1000
+          };
+
+        case "noon":
+          return {
+            x: Math.random() * width,
+            y: initBottom ? height + 40 : Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.8,
+            vy: -Math.random() * 1.4 - 0.6,
+            size: Math.random() * 8 + 3,
+            opacity: Math.random() * 0.4 + 0.2,
+            color: "46, 154, 79",
+            type: "bubble",
+            wobble: Math.random() * Math.PI,
+            wobbleSpeed: Math.random() * 0.05 + 0.02,
+            popTimer: Math.random() * 600 + 400
+          };
+
+        case "sunset":
+          return {
+            x: Math.random() * width,
+            y: initBottom ? -40 : Math.random() * height,
+            vx: Math.random() * 0.8 + 0.4,
+            vy: Math.random() * 0.8 + 0.6,
+            size: Math.random() * 14 + 8,
+            rotation: Math.random() * Math.PI * 2,
+            rotSpeed: (Math.random() - 0.5) * 0.04,
+            opacity: Math.random() * 0.35 + 0.2,
+            color: Math.random() > 0.5 ? "#d97706" : "#f59e0b",
+            type: "leaf",
+            wobble: Math.random() * Math.PI * 2,
+            wobbleSpeed: Math.random() * 0.02 + 0.01
+          };
+
+        case "midnight":
+          return {
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.15,
+            vy: (Math.random() - 0.5) * 0.15,
+            size: Math.random() * 2.5 + 0.5,
+            opacity: Math.random() * 0.8 + 0.2,
+            glowSize: Math.random() * 8 + 4,
+            pulseSpeed: Math.random() * 0.04 + 0.01,
+            pulseOffset: Math.random() * Math.PI,
+            type: "star"
+          };
+      }
+    };
+
+    const count = ambientTime === "dawn" ? 25 : ambientTime === "noon" ? 45 : ambientTime === "sunset" ? 35 : 120;
+    for (let i = 0; i < count; i++) {
+      particles.push(createParticle(false));
+    }
+
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach((p, idx) => {
+        switch (p.type) {
+          case "vapor":
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life++;
+            if (p.life < 200) {
+              p.opacity = (p.life / 200) * p.maxOpacity;
+            } else if (p.life > p.maxLife - 200) {
+              p.opacity = ((p.maxLife - p.life) / 200) * p.maxOpacity;
+            } else {
+              p.opacity = p.maxOpacity;
+            }
+
+            const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, p.size);
+            grad.addColorStop(0, `rgba(${p.color}, ${p.opacity})`);
+            grad.addColorStop(0.5, `rgba(${p.color}, ${p.opacity * 0.4})`);
+            grad.addColorStop(1, `rgba(${p.color}, 0)`);
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (p.life >= p.maxLife || p.y < -p.size || p.x < -p.size || p.x > canvas.width + p.size) {
+              particles[idx] = createParticle(true);
+            }
+            break;
+
+          case "bubble":
+            p.y += p.vy;
+            p.wobble += p.wobbleSpeed;
+            p.x += p.vx + Math.sin(p.wobble) * 0.3;
+            p.popTimer--;
+
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(${p.color}, ${p.opacity})`;
+            ctx.lineWidth = 1.2;
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.strokeStyle = `rgba(255, 255, 255, ${p.opacity * 1.5})`;
+            ctx.lineWidth = 1.0;
+            ctx.arc(p.x - p.size * 0.3, p.y - p.size * 0.3, p.size * 0.4, Math.PI * 1.1, Math.PI * 1.6);
+            ctx.stroke();
+
+            if (p.popTimer <= 0 || p.y < -p.size * 2) {
+              particles[idx] = createParticle(true);
+            }
+            break;
+
+          case "leaf":
+            p.y += p.vy;
+            p.x += p.vx + Math.sin(p.wobble) * 0.4;
+            p.wobble += p.wobbleSpeed;
+            p.rotation += p.rotSpeed;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rotation);
+            ctx.beginPath();
+            ctx.fillStyle = p.color;
+            ctx.globalAlpha = p.opacity;
+            ctx.moveTo(0, -p.size);
+            ctx.quadraticCurveTo(p.size * 0.6, -p.size * 0.2, 0, p.size);
+            ctx.quadraticCurveTo(-p.size * 0.6, -p.size * 0.2, 0, -p.size);
+            ctx.fill();
+            ctx.restore();
+
+            if (p.y > canvas.height + p.size || p.x > canvas.width + p.size) {
+              particles[idx] = createParticle(true);
+            }
+            break;
+
+          case "star":
+            p.x += p.vx;
+            p.y += p.vy;
+            p.pulseOffset += p.pulseSpeed;
+            const currentOpacity = p.opacity * (0.35 + 0.65 * Math.sin(p.pulseOffset));
+
+            ctx.beginPath();
+            ctx.fillStyle = `rgba(16, 185, 129, ${currentOpacity})`;
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (p.size > 1.8) {
+              ctx.beginPath();
+              ctx.strokeStyle = `rgba(16, 185, 129, ${currentOpacity * 0.45})`;
+              ctx.lineWidth = 0.8;
+              ctx.moveTo(p.x - p.glowSize, p.y);
+              ctx.lineTo(p.x + p.glowSize, p.y);
+              ctx.moveTo(p.x, p.y - p.glowSize);
+              ctx.lineTo(p.x, p.y + p.glowSize);
+              ctx.stroke();
+            }
+
+            if (p.x < 0 || p.x > canvas.width) p.vx = -p.vx;
+            if (p.y < 0 || p.y > canvas.height) p.vy = -p.vy;
+            break;
+        }
+      });
+
+      animationFrame = requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    return () => {
+      window.removeEventListener("resize", resizeCanvas);
+      cancelAnimationFrame(animationFrame);
+    };
+  }, [ambientActive, ambientTime]);
+
+  const getBackgroundGradient = () => {
+    if (!ambientActive) return undefined;
+    switch (ambientTime) {
+      case "dawn": return "linear-gradient(to bottom right, #EFF5FA, #DCE3E8)";
+      case "noon": return "linear-gradient(to bottom right, #FAFCF8, #E3ECCE)";
+      case "sunset": return "linear-gradient(to bottom right, #FEF9EC, #F5D8BA)";
+      case "midnight": return "linear-gradient(to bottom right, #0A140C, #040905)";
+    }
+  };
+
+  const isDark = ambientActive && ambientTime === "midnight";
+  const textClass = isDark ? "text-[#E2F5E9]" : "text-[#0F2A1E]";
+  const mutedTextClass = isDark ? "text-[#A5C4B4]" : "text-[#586b5e]";
+  const borderClass = isDark ? "border-emerald-950/40" : "border-[#E3EADD]";
+  const cardBgClass = isDark ? "bg-[#09120B]/90 border-emerald-900/40" : "bg-white border-[#E3EADD]";
+  const lightBgClass = isDark ? "bg-[#050B06]/85 border-emerald-950/30" : "bg-[#FAFCF8] border-[#E3EADD]/60";
+  const accentColor = 
+    ambientTime === "dawn" ? "#14b8a6" : 
+    ambientTime === "noon" ? "#2E9A4F" : 
+    ambientTime === "sunset" ? "#d97706" : "#10b981";
+
   // ── MOUSE TRACKING FOR MAGNETIC/GLOW EFFECTS ──────────────────────────────
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
@@ -271,15 +1007,6 @@ export default function DesignPlayground() {
   ];
 
   // ── AUDIO TESTIMONIALS CONSOLE (5 Recordings with Live Equalizers) ───────
-  const [playingTrack, setPlayingTrack] = useState<number | null>(null);
-  const [globalMasterPlaying, setGlobalMasterPlaying] = useState(false);
-  const soundboardTracks = [
-    { id: 1, name: "David M.", area: "Tarneit Resident", text: "FOGO smells went away in 10 mins. Brilliant service!", dur: "0:24" },
-    { id: 2, name: "Jessica R.", area: "Hoppers Crossing Mum", text: "Perfect fortnightly timing right after bins get emptied.", dur: "0:31" },
-    { id: 3, name: "Liam G.", area: "Truganina Resident", text: "No more maggots in my green lid bin. Unbelievable!", dur: "0:19" },
-    { id: 4, name: "Sarah K.", area: "Point Cook Beach", text: "Our bin was clean enough to eat out of. Smells like lime.", dur: "0:42" },
-    { id: 5, name: "Sanjay P.", area: "Werribee Business", text: "Reliable, local, same-day, and they roll it inside our gate.", dur: "0:28" }
-  ];
 
   // ── LANDING PAGE VIEWPORT PRESETS SANDBOX (5 Architectural Layouts) ──────
   const [activePresetStyle, setActivePresetStyle] = useState<1 | 2 | 3 | 4 | 5>(1);
@@ -465,9 +1192,16 @@ export default function DesignPlayground() {
   return (
     <motion.div 
       ref={containerRef}
-      style={{ backgroundColor: bgProgress }}
-      className="min-h-screen text-[#0F2A1E] font-sans antialiased overflow-x-hidden selection:bg-emerald-100 selection:text-emerald-800 transition-colors duration-500"
+      style={ambientActive ? { background: getBackgroundGradient() } : { backgroundColor: bgProgress }}
+      className={`min-h-screen ${textClass} font-sans antialiased overflow-x-hidden selection:bg-emerald-100 selection:text-emerald-800 transition-colors duration-500 relative`}
     >
+      {/* Feature 3: Ambiance Background Particle Canvas */}
+      {ambientActive && (
+        <canvas
+          ref={particleCanvasRef}
+          className="fixed inset-0 pointer-events-none z-0 opacity-80"
+        />
+      )}
       
       {/* Cinematic Awwwards Header */}
       <header className="relative py-28 border-b border-[#E3EADD] overflow-hidden bg-gradient-to-b from-emerald-50/20 to-transparent">
@@ -1376,11 +2110,17 @@ export default function DesignPlayground() {
                   <div className="flex items-center gap-3">
                     {playingTrack === track.id ? (
                       <div className="flex gap-0.5 h-6 items-end">
-                        <span className="w-1 h-4 bg-emerald-500 rounded animate-pulse" />
-                        <span className="w-1 h-3 bg-emerald-500 rounded animate-pulse [animation-delay:0.2s]" />
-                        <span className="w-1 h-5 bg-emerald-500 rounded animate-pulse [animation-delay:0.4s]" />
-                        <span className="w-1 h-2 bg-emerald-500 rounded animate-pulse [animation-delay:0.1s]" />
-                        <span className="w-1 h-4 bg-emerald-500 rounded animate-pulse [animation-delay:0.3s]" />
+                        {[2, 5, 8, 11, 14].map((binIdx) => {
+                          const amp = vocalFrequencyArray[binIdx] || 0;
+                          const heightVal = Math.max(4, Math.min(24, amp * 0.15));
+                          return (
+                            <span 
+                              key={binIdx}
+                              style={{ height: `${heightVal}px` }}
+                              className="w-1 bg-emerald-500 rounded transition-all duration-75"
+                            />
+                          );
+                        })}
                       </div>
                     ) : (
                       <span className="text-[11px] font-mono text-slate-400 font-bold">{track.dur}</span>
@@ -2284,16 +3024,29 @@ export default function DesignPlayground() {
                         snappy: { type: "spring", stiffness: 450, damping: 22, mass: 0.7 },
                         heavy: { type: "spring", stiffness: 120, damping: 18, mass: 1.8 }
                       } as const;
+
+                      const amplitude = vocalFrequencyArray[idx] || 0;
+                      const scaleYVal = 1 + amplitude * 0.0055;
+                      const scaleXVal = 1 - amplitude * 0.0022;
+                      const yVal = -amplitude * 0.16;
+                      const baseColor = isDark ? "#E2F5E9" : "#0F2A1E";
+                      const activeColor = amplitude > 10 ? accentColor : baseColor;
                       
                       return (
                         <motion.span
                           key={idx}
-                          className="inline-block font-black text-2xl md:text-3xl text-[#0F2A1E] cursor-pointer"
+                          className="inline-block font-black text-2xl md:text-3xl cursor-pointer"
+                          animate={{
+                            scaleY: scaleYVal,
+                            scaleX: scaleXVal,
+                            y: yVal,
+                            color: activeColor
+                          }}
                           whileHover={{
                             scaleY: 1.45,
                             scaleX: 0.8,
                             y: -18,
-                            color: "#2E9A4F",
+                            color: accentColor,
                           }}
                           transition={physicsConfig[elasticTension] || physicsConfig.wobbly}
                         >
@@ -2595,6 +3348,147 @@ export default function DesignPlayground() {
           }
         }
       `}</style>
+
+      {liquidSweepActive && (
+        <canvas
+          ref={webglCanvasRef}
+          className="fixed inset-0 pointer-events-none z-50 w-full h-full"
+        />
+      )}
+
+      {/* Experiential Control Console Widget */}
+      <div className="fixed bottom-6 right-6 z-50">
+        <AnimatePresence>
+          {!experientialConsoleExpanded ? (
+            <motion.button
+              key="collapsed-console"
+              layoutId="experiential-console"
+              onClick={() => setExperientialConsoleExpanded(true)}
+              className="p-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full shadow-[0_8px_30px_rgba(16,185,129,0.3)] flex items-center justify-center border border-emerald-500/30 cursor-pointer relative group overflow-hidden text-center inline-block"
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+            >
+              {/* Shimmer / pulse ring */}
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-150%] group-hover:animate-[shimmer_2s_infinite]" />
+              <span className="absolute -inset-1 rounded-full bg-emerald-400/25 animate-ping opacity-75 pointer-events-none" />
+              <Compass className="w-6 h-6 animate-[spin_10s_linear_infinite]" />
+            </motion.button>
+          ) : (
+            <motion.div
+              key="expanded-console"
+              layoutId="experiential-console"
+              className="w-80 max-w-[calc(100vw-2rem)] bg-white/90 dark:bg-[#060D08]/90 backdrop-blur-xl border border-[#E3EADD] dark:border-emerald-900/50 rounded-3xl p-6 shadow-[0_20px_50px_rgba(0,0,0,0.15)] dark:shadow-[0_20px_50px_rgba(0,0,0,0.5)] text-[#0F2A1E] dark:text-[#E2F5E9] flex flex-col gap-4 text-left"
+              initial={{ opacity: 0, scale: 0.9, y: 20 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            >
+              <div className="flex justify-between items-center border-b border-[#E3EADD] dark:border-emerald-955 pb-3">
+                <div className="flex items-center gap-2">
+                  <motion.div
+                    animate={{ rotate: 360 }}
+                    transition={{ repeat: Infinity, duration: 15, ease: "linear" }}
+                    className="flex items-center justify-center text-emerald-600 dark:text-emerald-400"
+                  >
+                    <Compass className="w-5 h-5" />
+                  </motion.div>
+                  <span className="font-black text-xs uppercase tracking-wider">Experiential Hub</span>
+                </div>
+                <button 
+                  onClick={() => setExperientialConsoleExpanded(false)}
+                  className="p-1 hover:bg-slate-100 dark:hover:bg-emerald-950/40 rounded-full transition-colors cursor-pointer text-slate-400 hover:text-slate-600 dark:hover:text-emerald-200"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                {/* 1. Ambiance Master Switch */}
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-black uppercase tracking-wider">Ambient Engine</span>
+                  <button
+                    onClick={() => setAmbientActive(prev => !prev)}
+                    className={`relative w-12 h-6 rounded-full transition-colors duration-300 cursor-pointer ${
+                      ambientActive ? "bg-[#2E9A4F]" : "bg-slate-300 dark:bg-emerald-950"
+                    }`}
+                  >
+                    <motion.span
+                      layout
+                      className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full shadow"
+                      animate={{ x: ambientActive ? 24 : 0 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 25 }}
+                    />
+                  </button>
+                </div>
+
+                {/* 2. Dials / Presets */}
+                {ambientActive && (
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">Environment Preset</span>
+                    <div className="grid grid-cols-4 gap-1.5 bg-slate-100/60 dark:bg-emerald-950/20 p-1 rounded-xl border border-slate-200/40 dark:border-emerald-900/10">
+                      {(["dawn", "noon", "sunset", "midnight"] as const).map((time) => {
+                        const isSelected = ambientTime === time;
+                        const Icon = time === "dawn" ? Sunrise : time === "noon" ? Sun : time === "sunset" ? Sunset : Moon;
+                        return (
+                          <button
+                            key={time}
+                            onClick={() => setAmbientTime(time)}
+                            className={`py-2 px-1 rounded-lg flex flex-col items-center justify-center gap-1 transition-all cursor-pointer capitalize text-[9px] font-black ${
+                              isSelected
+                                ? "bg-white dark:bg-emerald-900 shadow-sm text-emerald-700 dark:text-emerald-100 border border-emerald-100 dark:border-emerald-800"
+                                : "text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200"
+                            }`}
+                          >
+                            <Icon className="w-3.5 h-3.5" />
+                            <span className="scale-90">{time}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* 3. Trigger Liquid Sweep Button */}
+                <div className="space-y-2">
+                  <span className="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">WebGL Action</span>
+                  <button
+                    onClick={startLiquidSweep}
+                    disabled={liquidSweepActive}
+                    className={`w-full py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 font-black text-xs uppercase tracking-wider transition-all border cursor-pointer ${
+                      liquidSweepActive
+                        ? "bg-slate-100 dark:bg-emerald-950/10 text-slate-400 border-slate-200/50"
+                        : "bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-400/20 shadow-[0_4px_15px_rgba(16,185,129,0.2)] dark:shadow-none"
+                    }`}
+                  >
+                    <Waves className={`w-4 h-4 ${liquidSweepActive ? "" : "animate-pulse"}`} />
+                    {liquidSweepActive ? "Sweep in progress..." : "Trigger Liquid Sweep"}
+                  </button>
+                </div>
+
+                {/* 4. Audio Spectrometer */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-center text-[10px] font-bold text-slate-400 dark:text-[#586b5e] uppercase tracking-wider">
+                    <span>Audio Spectrometer</span>
+                    <Activity className="w-3.5 h-3.5 text-emerald-500 animate-pulse" />
+                  </div>
+                  <div className="flex items-end justify-between h-9 bg-slate-50 dark:bg-[#030604]/50 rounded-xl px-2 py-1.5 border border-[#E3EADD] dark:border-emerald-950/40">
+                    {vocalFrequencyArray.map((amp, index) => {
+                      const barHeight = Math.min(100, Math.max(10, (amp / 255) * 100));
+                      return (
+                        <div
+                          key={index}
+                          className="w-1 rounded-full bg-[#2E9A4F] dark:bg-emerald-400 transition-all duration-75"
+                          style={{ height: `${barHeight}%` }}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
     </motion.div>
   );
