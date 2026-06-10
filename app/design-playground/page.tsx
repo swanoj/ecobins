@@ -237,11 +237,11 @@ export default function DesignPlayground() {
   const [playingTrack, setPlayingTrack] = useState<number | null>(null);
   const [globalMasterPlaying, setGlobalMasterPlaying] = useState(false);
   const soundboardTracks = [
-    { id: 1, name: "David M.", area: "Tarneit Resident", text: "FOGO smells went away in 10 mins. Brilliant service!", dur: "0:24" },
-    { id: 2, name: "Jessica R.", area: "Hoppers Crossing Mum", text: "Perfect fortnightly timing right after bins get emptied.", dur: "0:31" },
-    { id: 3, name: "Liam G.", area: "Truganina Resident", text: "No more maggots in my green lid bin. Unbelievable!", dur: "0:19" },
-    { id: 4, name: "Sarah K.", area: "Point Cook Beach", text: "Our bin was clean enough to eat out of. Smells like lime.", dur: "0:42" },
-    { id: 5, name: "Sanjay P.", area: "Werribee Business", text: "Reliable, local, same-day, and they roll it inside our gate.", dur: "0:28" }
+    { id: 1, name: "David M.", area: "Tarneit Resident", text: "FOGO smells went away in 10 mins. Brilliant service!", dur: "0:24", rating: 5, date: "3 days ago" },
+    { id: 2, name: "Jessica R.", area: "Hoppers Crossing Mum", text: "Perfect fortnightly timing right after bins get emptied.", dur: "0:31", rating: 5, date: "1 week ago" },
+    { id: 3, name: "Liam G.", area: "Truganina Resident", text: "No more maggots in my green lid bin. Unbelievable!", dur: "0:19", rating: 5, date: "2 weeks ago" },
+    { id: 4, name: "Sarah K.", area: "Point Cook Beach", text: "Our bin was clean enough to eat out of. Smells like lime.", dur: "0:42", rating: 5, date: "1 month ago" },
+    { id: 5, name: "Sanjay P.", area: "Werribee Business", text: "Reliable, local, same-day, and they roll it inside our gate.", dur: "0:28", rating: 5, date: "2 months ago" }
   ];
 
   const [ambientTime, setAmbientTime] = useState<'dawn' | 'noon' | 'sunset' | 'midnight'>('noon');
@@ -2068,46 +2068,109 @@ export default function DesignPlayground() {
       </section>
 
       {/* SECTION 4: Customer Recording Soundboard */}
-      <section className="py-24 border-b border-[#E3EADD]">
+      <section className="py-24 border-b border-[#E3EADD] dark:border-emerald-950/40">
         <div className="mx-auto max-w-7xl px-6">
-          <div className="mb-16 text-center max-w-2xl mx-auto">
-            <span className="text-xs font-black tracking-widest text-[#0C3A52] uppercase">Audio Reviews</span>
-            <h2 className="text-4xl font-black mt-2 text-[#0F2A1E]">The Sound of Pure Clean</h2>
-            <p className="text-[#586b5e] mt-3">We recorded 5 raw voicemails from ecstatic clients across Melbourne's West. Hear their unedited, unfiltered relief live.</p>
+          <div className="mb-16 text-center max-w-2xl mx-auto flex flex-col items-center">
+            <span className="text-xs font-black tracking-widest text-[#0C3A52] dark:text-emerald-400 uppercase">Audio Reviews</span>
+            <h2 className="text-4xl font-black mt-2 text-[#0F2A1E] dark:text-[#E2F5E9]">The Sound of Pure Clean</h2>
+            <p className="text-[#586b5e] dark:text-[#A5C4B4] mt-3">We recorded 5 raw voicemails from ecstatic clients across Melbourne's West. Hear their unedited, unfiltered relief live.</p>
+            
+            {/* Google Verified Review Summarizer Badge */}
+            <div className="mt-6 flex flex-wrap items-center justify-center gap-2 bg-[#FAFCF8] dark:bg-[#050B06]/65 border border-[#E3EADD] dark:border-emerald-900/25 px-4 py-2 rounded-full shadow-xs">
+              <svg className="w-4 h-4" viewBox="0 0 24 24">
+                <path
+                  fill="#EA4335"
+                  d="M12 5.04c1.63 0 3.1.56 4.25 1.64l3.18-3.18C17.51 1.64 14.97 1 12 1 7.35 1 3.39 3.67 1.39 7.56l3.85 2.99c.9-2.7 3.44-4.51 6.76-4.51z"
+                />
+                <path
+                  fill="#4285F4"
+                  d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.29 1.48-1.14 2.73-2.43 3.58l3.77 2.92c2.2-2.03 3.69-5.02 3.69-8.65z"
+                />
+                <path
+                  fill="#FBBC05"
+                  d="M5.24 14.45c-.24-.72-.38-1.5-.38-2.3s.14-1.58.38-2.3L1.39 6.86C.5 8.65 0 10.27 0 12.15s.5 3.5 1.39 5.29l3.85-2.99z"
+                />
+                <path
+                  fill="#34A853"
+                  d="M12 23c3.24 0 5.97-1.07 7.96-2.92l-3.77-2.92c-1.11.75-2.52 1.2-4.19 1.2-3.32 0-5.86-1.81-6.76-4.51H1.39l-3.85 2.99C3.39 20.33 7.35 23 12 23z"
+                />
+              </svg>
+              <div className="flex gap-0.5 text-amber-500">
+                <span className="text-xs">★</span>
+                <span className="text-xs">★</span>
+                <span className="text-xs">★</span>
+                <span className="text-xs">★</span>
+                <span className="text-xs">★</span>
+              </div>
+              <span className="text-[10px] md:text-[11px] font-black text-[#0F2A1E] dark:text-[#E2F5E9] uppercase tracking-wider flex items-center gap-1.5">
+                4.9/5 Rating · 142 Google Verified Reviews
+                <span className="inline-flex w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              </span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-[1.8fr_1.2fr] gap-12 items-center bg-white border border-[#E3EADD] rounded-[36px] p-8 md:p-12 shadow-sm">
+          <div className={`grid grid-cols-1 lg:grid-cols-[1.8fr_1.2fr] gap-12 items-center border rounded-[36px] p-6 md:p-12 shadow-sm transition-all duration-500 ${cardBgClass}`}>
             
             {/* Left: 5 Voice Tracks Grid */}
             <div className="space-y-4">
               {soundboardTracks.map((track) => (
                 <div 
                   key={track.id} 
-                  className={`border rounded-2xl p-4 transition-all duration-250 flex items-center justify-between ${
+                  className={`border rounded-2xl p-5 transition-all duration-250 flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
                     playingTrack === track.id 
-                      ? "border-emerald-500 bg-emerald-50/20 shadow-xs" 
-                      : "border-[#E3EADD] bg-[#FAFCF8] hover:bg-white hover:shadow-xs"
+                      ? isDark
+                        ? "border-emerald-500 bg-emerald-950/20 shadow-[0_0_15px_rgba(16,185,129,0.15)]"
+                        : "border-emerald-500 bg-emerald-50/20 shadow-xs" 
+                      : isDark
+                        ? "border-emerald-950/40 bg-[#050B06]/40 hover:bg-[#071108]/60 hover:shadow-xs"
+                        : "border-[#E3EADD] bg-[#FAFCF8] hover:bg-white hover:shadow-xs"
                   }`}
                 >
-                  <div className="flex items-center gap-4 flex-grow">
+                  <div className="flex items-start gap-4 flex-grow">
                     {/* Play Button */}
                     <button 
                       onClick={() => setPlayingTrack(playingTrack === track.id ? null : track.id)}
-                      className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 scale-100 active:scale-95 transition-all"
+                      className="w-10 h-10 rounded-full bg-emerald-500 text-white flex items-center justify-center hover:bg-emerald-600 scale-100 active:scale-95 transition-all flex-shrink-0 mt-0.5"
                     >
                       {playingTrack === track.id ? <Pause size={16} /> : <Play size={16} className="ml-0.5" />}
                     </button>
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="font-extrabold text-xs text-[#0F2A1E]">{track.name}</span>
-                        <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold uppercase tracking-wider">{track.area}</span>
+                    
+                    <div className="space-y-1.5">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="font-extrabold text-xs text-[#0F2A1E] dark:text-[#E2F5E9]">{track.name}</span>
+                        
+                        {/* Verified Google Review Tag */}
+                        <span className="text-[9px] bg-emerald-50 dark:bg-emerald-950/50 text-[#1F7A3D] dark:text-emerald-400 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-emerald-100 dark:border-emerald-900/40 flex items-center gap-1">
+                          <Check size={9} className="stroke-[3]" />
+                          Verified Purchase
+                        </span>
+                        
+                        <span className="text-[10px] bg-slate-100 dark:bg-[#0C1A10] text-slate-500 dark:text-[#A5C4B4] px-2 py-0.5 rounded font-bold uppercase tracking-wider border border-transparent dark:border-emerald-950/40">{track.area}</span>
+                        
+                        <div className="flex items-center gap-1.5 text-[9px] text-slate-400 dark:text-slate-500 font-mono">
+                          <svg className="w-3.5 h-3.5" viewBox="0 0 24 24">
+                            <path
+                              fill="#4285F4"
+                              d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114A5.96 5.96 0 018.03 12.557a5.96 5.96 0 015.96-5.961c1.554 0 2.955.59 4.053 1.558l3.125-3.125A10.316 10.316 0 0013.99 1.1c-5.733 0-10.38 4.647-10.38 10.38 0 5.733 4.647 10.38 10.38 10.38 5.733 0 10.38-4.647 10.38-10.38 0-.648-.065-1.296-.194-1.93L12.24 10.285z"
+                            />
+                          </svg>
+                          <span>Google Review · {track.date}</span>
+                        </div>
                       </div>
-                      <p className="text-xs italic text-slate-600 max-w-[28em]">"{track.text}"</p>
+
+                      {/* Stars */}
+                      <div className="flex gap-0.5 text-amber-500">
+                        {Array.from({ length: track.rating || 5 }).map((_, i) => (
+                          <span key={i} className="text-xs">★</span>
+                        ))}
+                      </div>
+
+                      <p className="text-xs italic text-slate-600 dark:text-[#A5C4B4] max-w-[28em] leading-relaxed">"{track.text}"</p>
                     </div>
                   </div>
 
                   {/* Equalizer Wave / Timer */}
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 self-end sm:self-center">
                     {playingTrack === track.id ? (
                       <div className="flex gap-0.5 h-6 items-end">
                         {[2, 5, 8, 11, 14].map((binIdx) => {
@@ -2123,7 +2186,7 @@ export default function DesignPlayground() {
                         })}
                       </div>
                     ) : (
-                      <span className="text-[11px] font-mono text-slate-400 font-bold">{track.dur}</span>
+                      <span className="text-[11px] font-mono text-slate-400 dark:text-slate-500 font-bold">{track.dur}</span>
                     )}
                   </div>
                 </div>
@@ -2281,9 +2344,17 @@ export default function DesignPlayground() {
                     <div className="col-span-3 border border-[#E3EADD] bg-white p-4 rounded-xl text-center">
                       <h4 className="font-black text-xs uppercase tracking-wider">Tarneit Local Command Center</h4>
                     </div>
-                    <div className="border border-[#E3EADD] bg-white p-4 rounded-xl text-center h-[120px] flex flex-col justify-center">
-                      <span className="text-lg">⭐ 4.9</span>
-                      <span className="text-[9px] text-slate-400 block mt-1">Google reviews</span>
+                    <div className="border border-[#E3EADD] bg-white p-4 rounded-xl text-center h-[120px] flex flex-col justify-center items-center gap-1 shadow-xs">
+                      <div className="flex items-center gap-1.5 justify-center">
+                        <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
+                          <path fill="#EA4335" d="M12 5.04c1.63 0 3.1.56 4.25 1.64l3.18-3.18C17.51 1.64 14.97 1 12 1 7.35 1 3.39 3.67 1.39 7.56l3.85 2.99c.9-2.7 3.44-4.51 6.76-4.51z" />
+                          <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.29 1.48-1.14 2.73-2.43 3.58l3.77 2.92c2.2-2.03 3.69-5.02 3.69-8.65z" />
+                          <path fill="#FBBC05" d="M5.24 14.45c-.24-.72-.38-1.5-.38-2.3s.14-1.58.38-2.3L1.39 6.86C.5 8.65 0 10.27 0 12.15s.5 3.5 1.39 5.29l3.85-2.99z" />
+                          <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.92l-3.77-2.92c-1.11.75-2.52 1.2-4.19 1.2-3.32 0-5.86-1.81-6.76-4.51H1.39l-3.85 2.99C3.39 20.33 7.35 23 12 23z" />
+                        </svg>
+                        <span className="text-md font-black text-slate-850">4.9 ★</span>
+                      </div>
+                      <span className="text-[9px] text-slate-400 block font-black uppercase tracking-wider">Google reviews</span>
                     </div>
                     <div className="border border-[#E3EADD] bg-white p-4 rounded-xl text-center h-[120px] flex flex-col justify-center">
                       <span className="text-lg">💧 Recycled</span>
@@ -2355,19 +2426,62 @@ export default function DesignPlayground() {
                     exit={{ opacity: 0, scale: 0.98 }}
                     className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full"
                   >
-                    <div className="col-span-3 text-center mb-2">
-                      <h4 className="font-black text-lg text-slate-900">What Wyndham Residents are Saying</h4>
-                      <p className="text-[10px] text-slate-400">Join over 1,200 local homeowners in Hoppers Crossing, Tarneit and Werribee</p>
+                    <div className="col-span-3 text-center mb-4 flex flex-col items-center">
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-emerald-50 text-emerald-800 text-[10px] font-black uppercase rounded-full tracking-wider border border-emerald-100">
+                        <Check size={10} className="stroke-[3.5]" />
+                        100% Verified Customer Proof
+                      </div>
+                      <h4 className="font-black text-2xl text-slate-900 mt-2.5">What Wyndham Residents are Saying</h4>
+                      <p className="text-[11px] text-slate-500 mt-1 max-w-md">Join over 1,200 local homeowners in Hoppers Crossing, Tarneit and Werribee who rate EcoBins 4.9/5 stars on Google.</p>
                     </div>
                     {[
-                      { name: "Liam G.", area: "Tarneit", txt: "No more maggots in our hot bin." },
-                      { name: "David M.", area: "Truganina", txt: "Cleaned inside 10 mins post dump." },
-                      { name: "Jessica R.", area: "Point Cook", txt: "Highly recommend alternating plan." }
+                      { initials: "LG", name: "Liam G.", area: "Tarneit VIC", txt: "No more maggots in our hot bin. Same-day collection syncing was perfect.", date: "3 days ago" },
+                      { initials: "DM", name: "David M.", area: "Truganina VIC", txt: "Cleaned inside 10 mins post-dump. Highly recommend alternating plan.", date: "1 week ago" },
+                      { initials: "JR", name: "Jessica R.", area: "Point Cook VIC", txt: "Our bins smell like fresh lime now. Super reliable team, very polite.", date: "2 weeks ago" }
                     ].map((review, idx) => (
-                      <div key={idx} className="border border-[#E3EADD] bg-white p-4 rounded-xl text-center shadow-xs">
-                        <span className="text-[9px] font-black text-slate-700 block">{review.name}</span>
-                        <span className="text-[8px] text-slate-400 uppercase tracking-wider block mt-0.5">{review.area}</span>
-                        <p className="text-[10px] italic text-slate-500 mt-2 leading-relaxed">"{review.txt}"</p>
+                      <div key={idx} className="border border-[#E3EADD] bg-white p-5 rounded-2xl text-left shadow-xs flex flex-col justify-between min-h-[220px] relative group overflow-hidden hover:border-emerald-300 hover:shadow-md transition-all duration-300">
+                        {/* Watermark Logo */}
+                        <div className="absolute -top-4 -right-4 w-16 h-16 text-slate-100 pointer-events-none group-hover:scale-110 transition-transform duration-300">
+                          <svg className="w-full h-full" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12.24 10.285V14.4h6.887c-.648 2.41-2.519 4.114-5.136 4.114A5.96 5.96 0 018.03 12.557a5.96 5.96 0 015.96-5.961c1.554 0 2.955.59 4.053 1.558l3.125-3.125A10.316 10.316 0 0013.99 1.1c-5.733 0-10.38 4.647-10.38 10.38 0 5.733 4.647 10.38 10.38 10.38 5.733 0 10.38-4.647 10.38-10.38 0-.648-.065-1.296-.194-1.93L12.24 10.285z" />
+                          </svg>
+                        </div>
+                        <div className="space-y-3 relative z-10">
+                          <div className="flex items-center justify-between">
+                            <div className="flex gap-0.5 text-amber-500">
+                              {Array(5).fill(null).map((_, i) => (
+                                <svg key={i} className="w-3.5 h-3.5 fill-current" viewBox="0 0 24 24">
+                                  <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                                </svg>
+                              ))}
+                            </div>
+                            <span className="text-[8px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-bold uppercase tracking-wider border border-emerald-100 flex items-center gap-0.5">
+                              <Check size={8} className="stroke-[3.5]" />
+                              Verified
+                            </span>
+                          </div>
+                          <p className="text-[11px] italic text-slate-600 leading-relaxed">"{review.txt}"</p>
+                        </div>
+                        <div className="flex items-center gap-2.5 mt-4 pt-3.5 border-t border-slate-100 relative z-10">
+                          <span className="w-8 h-8 rounded-full bg-gradient-to-br from-[#0C3A52] to-[#1E9466] text-white font-extrabold text-[11px] flex items-center justify-center flex-none">
+                            {review.initials}
+                          </span>
+                          <div className="min-w-0 flex-grow">
+                            <div className="flex items-baseline justify-between gap-1">
+                              <span className="text-[11px] font-black text-slate-800 truncate">{review.name}</span>
+                              <span className="text-[8px] text-slate-400 font-bold uppercase shrink-0">{review.area}</span>
+                            </div>
+                            <div className="flex items-center gap-1 text-[9px] text-slate-400 font-medium">
+                              <svg className="w-2.5 h-2.5" viewBox="0 0 24 24">
+                                <path fill="#EA4335" d="M12 5.04c1.63 0 3.1.56 4.25 1.64l3.18-3.18C17.51 1.64 14.97 1 12 1 7.35 1 3.39 3.67 1.39 7.56l3.85 2.99c.9-2.7 3.44-4.51 6.76-4.51z" />
+                                <path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.36H12v4.51h6.46c-.29 1.48-1.14 2.73-2.43 3.58l3.77 2.92c2.2-2.03 3.69-5.02 3.69-8.65z" />
+                                <path fill="#FBBC05" d="M5.24 14.45c-.24-.72-.38-1.5-.38-2.3s.14-1.58.38-2.3L1.39 6.86C.5 8.65 0 10.27 0 12.15s.5 3.5 1.39 5.29l3.85-2.99z" />
+                                <path fill="#34A853" d="M12 23c3.24 0 5.97-1.07 7.96-2.92l-3.77-2.92c-1.11.75-2.52 1.2-4.19 1.2-3.32 0-5.86-1.81-6.76-4.51H1.39l-3.85 2.99C3.39 20.33 7.35 23 12 23z" />
+                              </svg>
+                              <span>Google Review • {review.date}</span>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     ))}
                   </motion.div>

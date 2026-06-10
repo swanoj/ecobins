@@ -22,20 +22,25 @@ export async function POST(req: Request) {
 	const { name, email, phone, address, binday, bins } = parsed.data;
 
 	// Store lead in Supabase (cast until typed schema is generated via `supabase gen types`)
-	// eslint-disable-next-line @typescript-eslint/no-explicit-any
-	const { error: dbError } = await (getSupabase() as any)
-		.from("bookings")
-		.insert({
-			name,
-			email,
-			phone,
-			address,
-			binday,
-			bins,
-		});
+	try {
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
+		const { error: dbError } = await (getSupabase() as any)
+			.from("bookings")
+			.insert({
+				name,
+				email,
+				phone,
+				address,
+				binday,
+				bins,
+			});
 
-	if (dbError) {
-		console.error("Supabase insert error:", dbError);
+		if (dbError) {
+			console.error("Supabase insert error:", dbError);
+			// Don't fail the user request — still send email
+		}
+	} catch (error) {
+		console.error("Failed to store booking in Supabase database:", error);
 		// Don't fail the user request — still send email
 	}
 
