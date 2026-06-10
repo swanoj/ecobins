@@ -361,6 +361,107 @@ export default function DesignPlayground() {
   const textColor = useTransform(scrollYProgress, [0, 0.7, 0.9], ["#0F2A1E", "#0F2A1E", "#FAFCF8"]);
   const mutedTextColor = useTransform(scrollYProgress, [0, 0.7, 0.9], ["#586b5e", "#586b5e", "#cfe0e8"]);
 
+  // ── SECTION 8: KINETIC TYPOGRAPHY STATES ─────────────────────────────────
+  // Variant 1: Mask Reveal
+  const [revealKey, setRevealKey] = useState(0);
+  const [revealStagger, setRevealStagger] = useState(0.08);
+  const [revealSpringPreset, setRevealSpringPreset] = useState<"cinematic" | "snappy" | "wobbly">("cinematic");
+
+  // Variant 2: Cyber Scramble
+  const [decryptText, setDecryptText] = useState("SANITISED IN 10 MINUTES");
+  const [decryptActiveText, setDecryptActiveText] = useState("SANITISED IN 10 MINUTES");
+  const [decryptCharSet, setDecryptCharSet] = useState<"cyber" | "binary" | "matrix" | "hex">("cyber");
+  const [decryptDuration, setDecryptDuration] = useState(1.5); // seconds
+  const [isDecrypting, setIsDecrypting] = useState(false);
+
+  // Variant 3: Fluid Elastic Proximity
+  const [elasticTension, setElasticTension] = useState<"wobbly" | "snappy" | "heavy">("wobbly");
+
+  // Variant 4: Split-Tone Contrast Slide
+  const [splitPos, setSplitPos] = useState(50);
+
+  // Variant 5: SVG Curving Path Ribbon
+  const [splineOffset, setSplineOffset] = useState(0);
+  const [splineBaseSpeed, setSplineBaseSpeed] = useState(0.2);
+  const [splineShape, setSplineShape] = useState<"s-curve" | "loop">("s-curve");
+
+  // Advanced Decrypt Solver logic
+  const runDecryptSolver = (textToDecrypt: string) => {
+    if (isDecrypting) return;
+    setIsDecrypting(true);
+    
+    let iterations = 0;
+    const charSets = {
+      cyber: "▰▓░█_#@$%*+=<>?/~!",
+      binary: "01",
+      matrix: "ｦｱｳｴｵｶｷｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ1234567890",
+      hex: "0123456789ABCDEF"
+    };
+    const activeChars = charSets[decryptCharSet] || charSets.cyber;
+    const textLength = textToDecrypt.length;
+    
+    const totalSteps = Math.floor(decryptDuration * 30); // 30 updates per second
+    const stepsPerChar = totalSteps / textLength;
+
+    const interval = setInterval(() => {
+      setDecryptActiveText(
+        textToDecrypt
+          .split("")
+          .map((char, idx) => {
+            if (char === " ") return " ";
+            const resolvedBoundary = iterations / stepsPerChar;
+            if (idx < resolvedBoundary) {
+              return textToDecrypt[idx];
+            }
+            return activeChars[Math.floor(Math.random() * activeChars.length)];
+          })
+          .join("")
+      );
+
+      iterations++;
+      if (iterations >= totalSteps) {
+        clearInterval(interval);
+        setDecryptActiveText(textToDecrypt);
+        setIsDecrypting(false);
+      }
+    }, 1000 / 30);
+  };
+
+  // Run automatically once on mount or when character set changes
+  useEffect(() => {
+    runDecryptSolver(decryptText);
+  }, [decryptCharSet]);
+
+  // SVG Spline marquee crawler loop with scroll velocity acceleration
+  useEffect(() => {
+    let lastScrollY = typeof window !== "undefined" ? window.scrollY : 0;
+    let scrollVelocity = 0;
+    let active = true;
+
+    const tick = () => {
+      if (!active) return;
+      
+      const currentScrollY = window.scrollY;
+      const diff = Math.abs(currentScrollY - lastScrollY);
+      scrollVelocity = scrollVelocity * 0.9 + diff * 0.1; // exp moving average
+      lastScrollY = currentScrollY;
+
+      // Map scroll velocity to offset increment, adding base speed
+      const speedModifier = 1 + scrollVelocity * 0.25;
+      setSplineOffset((prev) => (prev + splineBaseSpeed * speedModifier) % 100);
+
+      // Decelerate velocity gradually
+      scrollVelocity *= 0.95;
+
+      requestAnimationFrame(tick);
+    };
+
+    requestAnimationFrame(tick);
+    return () => {
+      active = false;
+    };
+  }, [splineBaseSpeed]);
+
   return (
     <motion.div 
       ref={containerRef}
@@ -1743,6 +1844,656 @@ export default function DesignPlayground() {
                   <MousePointerClick size={14} />
                   Trigger Bubble Wash Click
                 </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      {/* ── SECTION 8: FIVE KINETIC TYPOGRAPHY & TEXT ANIMATIONS ───────────────── */}
+      <section id="kinetic-typography" className="py-24 border-b border-[#E3EADD] bg-gradient-to-b from-white to-[#FAFCF8] relative overflow-hidden">
+        {/* Subtle background abstract grids or light shapes */}
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#eef2e6_1px,transparent_1px),linear-gradient(to_bottom,#eef2e6_1px,transparent_1px)] bg-[size:4rem_4rem] [mask-image:radial-gradient(ellipse_60%_50%_at_50%_50%,#000_70%,transparent_100%)] opacity-40 pointer-events-none" />
+        
+        <div className="mx-auto max-w-7xl px-6 relative z-10">
+          
+          {/* Section Header */}
+          <div className="max-w-3xl mx-auto text-center mb-20">
+            <span className="inline-flex items-center gap-1.5 px-4 py-1 bg-emerald-100/60 text-[#1F7A3D] text-[10px] font-extrabold tracking-widest uppercase rounded-full border border-emerald-200">
+              <Sparkles size={11} className="text-[#2E9A4F]" />
+              Variant Arena 08
+            </span>
+            <h2 className="text-4xl md:text-5xl font-black text-[#0F2A1E] mt-3 tracking-tight">
+              Kinetic Typography & <span className="text-[#2E9A4F]">Text Animations</span>
+            </h2>
+            <p className="text-sm md:text-base text-[#586b5e] mt-4 leading-relaxed max-w-[34em] mx-auto">
+              Interact with five state-driven typographic animation systems. Explore velocity-responsive curved vector paths, character proximity matrices, split-tone sliding masks, and cyber scrambling solver engines.
+            </p>
+          </div>
+
+          {/* Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            
+            {/* CARD 1: SPLIT-WORD CONTAINER MASK REVEAL */}
+            <div className="bg-white border border-[#E3EADD] rounded-3xl p-8 flex flex-col justify-between min-h-[380px] relative shadow-sm overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full filter blur-xl pointer-events-none" />
+              
+              <div>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-[10px] font-black tracking-widest text-[#2E9A4F] uppercase">Variant 01</span>
+                    <h3 className="font-extrabold text-lg text-[#0F2A1E] mt-1">Split-Word Container Mask Reveal</h3>
+                  </div>
+                  <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 text-[#2E9A4F] font-mono text-[9px] font-bold rounded">
+                    Spring Transform
+                  </span>
+                </div>
+                
+                {/* Visual Demo Box */}
+                <div className="mt-8 min-h-[140px] flex items-center justify-start py-4 bg-[#FAFCF8] rounded-2xl px-6 border border-[#E3EADD]/60 overflow-hidden relative">
+                  <AnimatePresence mode="wait">
+                    <motion.div 
+                      key={revealKey} 
+                      className="flex flex-wrap max-w-lg"
+                      initial="hidden"
+                      animate="visible"
+                    >
+                      {(() => {
+                        const springPresets = {
+                          cinematic: { stiffness: 45, damping: 15, mass: 1 },
+                          snappy: { stiffness: 180, damping: 18, mass: 0.8 },
+                          wobbly: { stiffness: 220, damping: 10, mass: 1.2 }
+                        };
+                        const config = springPresets[revealSpringPreset] || springPresets.cinematic;
+                        return "ECOBINS ARE DELIVERED SPARKLING CLEAN & SANITISED TO YOUR DOOR"
+                          .split(" ")
+                          .map((word, idx) => (
+                            <span 
+                              key={`${idx}-${revealKey}`} 
+                              className="inline-block overflow-hidden mr-2 mb-1 py-1"
+                            >
+                              <motion.span
+                                className="inline-block font-black text-xl md:text-2xl text-[#0F2A1E] leading-none"
+                                variants={{
+                                  hidden: { y: "115%" },
+                                  visible: { y: "0%" }
+                                }}
+                                transition={{
+                                  type: "spring",
+                                  stiffness: config.stiffness,
+                                  damping: config.damping,
+                                  mass: config.mass,
+                                  delay: idx * revealStagger
+                                }}
+                              >
+                                {word}
+                              </motion.span>
+                            </span>
+                          ));
+                      })()}
+                    </motion.div>
+                  </AnimatePresence>
+                </div>
+              </div>
+
+              {/* Interactive Controls & Telemetry */}
+              <div className="mt-8 space-y-6 pt-6 border-t border-[#E3EADD]/60">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Springs presets & sliders */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-[10px] font-black uppercase text-[#0F2A1E] tracking-wider mb-2">
+                        Spring Physics Preset
+                      </label>
+                      <div className="flex gap-1.5 bg-[#FAFCF8] p-1 rounded-xl border border-[#E3EADD]/60">
+                        {(["cinematic", "snappy", "wobbly"] as const).map((preset) => (
+                          <button
+                            key={preset}
+                            onClick={() => setRevealSpringPreset(preset)}
+                            className={`flex-1 text-[10px] font-extrabold py-2 px-2.5 rounded-lg transition-all capitalize ${
+                              revealSpringPreset === preset
+                                ? "bg-[#0C3A52] text-white shadow-sm"
+                                : "text-[#586b5e] hover:bg-slate-100 hover:text-[#0F2A1E]"
+                            }`}
+                          >
+                            {preset}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <label className="text-[10px] font-black uppercase text-[#0F2A1E] tracking-wider">
+                          Sequential Stagger
+                        </label>
+                        <span className="text-[10px] font-mono font-bold text-[#2E9A4F]">{revealStagger}s</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.02"
+                        max="0.20"
+                        step="0.01"
+                        value={revealStagger}
+                        onChange={(e) => setRevealStagger(parseFloat(e.target.value))}
+                        className="w-full h-1 bg-[#E3EADD] rounded-lg appearance-none cursor-pointer accent-[#2E9A4F]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Retro Telemetry Screen */}
+                  <div className="bg-[#0C3A52] text-emerald-400 font-mono text-[10px] p-4 rounded-2xl flex flex-col justify-between border border-emerald-500/20 shadow-inner">
+                    <div>
+                      <div className="flex items-center gap-1.5 text-emerald-300 font-extrabold uppercase text-[9px] mb-2 border-b border-emerald-400/20 pb-1.5">
+                        <Activity size={10} className="animate-pulse" />
+                        Live Spring Telemetry
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex justify-between">
+                          <span>Preset Mode:</span>
+                          <span className="text-white font-bold">{revealSpringPreset}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Stiffness Coeff:</span>
+                          <span className="text-emerald-300">
+                            {revealSpringPreset === "cinematic" ? 45 : revealSpringPreset === "snappy" ? 180 : 220} N/m
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Damping Factor:</span>
+                          <span className="text-emerald-300">
+                            {revealSpringPreset === "cinematic" ? 15 : revealSpringPreset === "snappy" ? 180 : 10} Ns/m
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Calculated Delay:</span>
+                          <span className="text-emerald-300">{(11 * revealStagger).toFixed(2)}s max</span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => setRevealKey((prev) => prev + 1)}
+                      className="mt-4 w-full bg-[#2E9A4F] text-white hover:bg-slate-900 font-black tracking-wide py-2 rounded-lg text-center transition-all flex items-center justify-center gap-1.5 cursor-pointer uppercase text-[9px]"
+                    >
+                      <RotateCw size={11} />
+                      Re-trigger Reveal Sequence
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CARD 2: MATRIX/CYBER DECRYPT SCRAMBLE */}
+            <div className="bg-white border border-[#E3EADD] rounded-3xl p-8 flex flex-col justify-between min-h-[380px] relative shadow-sm overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full filter blur-xl pointer-events-none" />
+              
+              <div>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-[10px] font-black tracking-widest text-[#2E9A4F] uppercase">Variant 02</span>
+                    <h3 className="font-extrabold text-lg text-[#0F2A1E] mt-1">Matrix / Cyber Decrypt Scramble</h3>
+                  </div>
+                  <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 text-[#2E9A4F] font-mono text-[9px] font-bold rounded">
+                    Glyph Matrix Solver
+                  </span>
+                </div>
+                
+                {/* Scramble Headline Sandbox */}
+                <div 
+                  className="mt-8 min-h-[140px] flex flex-col justify-center items-center py-6 bg-slate-950 rounded-2xl px-6 border border-slate-800 relative cursor-pointer group/headline"
+                  onMouseEnter={() => runDecryptSolver(decryptText)}
+                  onClick={() => runDecryptSolver(decryptText)}
+                >
+                  <div className="absolute top-3 right-4 text-[9px] font-mono font-bold text-slate-600 uppercase flex items-center gap-1">
+                    <Pointer size={10} />
+                    Hover or Click to Solve
+                  </div>
+                  <div className="font-mono font-extrabold text-lg md:text-xl text-emerald-400 text-center tracking-wider uppercase select-none max-w-md break-all leading-normal px-2">
+                    {decryptActiveText}
+                  </div>
+                </div>
+              </div>
+
+              {/* Dynamic Inputs & Live Telemetry Controls */}
+              <div className="mt-8 space-y-6 pt-6 border-t border-[#E3EADD]/60">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Control elements */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-[10px] font-black uppercase text-[#0F2A1E] tracking-wider mb-2">
+                        Customize Target String
+                      </label>
+                      <input
+                        type="text"
+                        maxLength={32}
+                        value={decryptText}
+                        onChange={(e) => {
+                          const val = e.target.value.toUpperCase();
+                          setDecryptText(val);
+                          setDecryptActiveText(val);
+                        }}
+                        className="w-full text-xs font-mono font-extrabold px-3 py-2.5 rounded-xl border border-[#E3EADD] bg-[#FAFCF8] text-[#0F2A1E] focus:outline-[#2E9A4F]"
+                        placeholder="TYPE TEXT..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-[10px] font-black uppercase text-[#0F2A1E] tracking-wider mb-2">
+                        Glyph Character Set
+                      </label>
+                      <div className="flex gap-1.5 bg-[#FAFCF8] p-1 rounded-xl border border-[#E3EADD]/60">
+                        {(["cyber", "binary", "matrix", "hex"] as const).map((set) => (
+                          <button
+                            key={set}
+                            onClick={() => setDecryptCharSet(set)}
+                            className={`flex-1 text-[9px] font-black py-2 rounded-lg transition-all capitalize ${
+                              decryptCharSet === set
+                                ? "bg-[#0C3A52] text-white shadow-sm"
+                                : "text-[#586b5e] hover:bg-slate-100"
+                            }`}
+                          >
+                            {set}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Retro Cyber Screen */}
+                  <div className="bg-slate-900 text-emerald-400 font-mono text-[10px] p-4 rounded-2xl flex flex-col justify-between border border-emerald-500/20 shadow-inner">
+                    <div>
+                      <div className="flex items-center gap-1.5 text-emerald-300 font-extrabold uppercase text-[9px] mb-2 border-b border-emerald-400/20 pb-1.5">
+                        <Activity size={10} className="animate-pulse" />
+                        Solver Metrics
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex justify-between">
+                          <span>State:</span>
+                          <span className={isDecrypting ? "text-amber-400 animate-pulse font-bold" : "text-emerald-400 font-bold"}>
+                            {isDecrypting ? "DECRYPTING" : "IDLE"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Char-Set:</span>
+                          <span className="text-white font-bold capitalize">{decryptCharSet}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Solve Duration:</span>
+                          <span className="text-white font-bold">{decryptDuration}s</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Frame Iterations:</span>
+                          <span className="text-emerald-300">{Math.floor(decryptDuration * 30)} cycles</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Solver Duration Range */}
+                    <div className="mt-4">
+                      <div className="flex justify-between text-[8px] uppercase font-bold text-slate-500 mb-1">
+                        <span>Speed Coeff:</span>
+                        <span>{decryptDuration}s</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.4"
+                        max="3.0"
+                        step="0.1"
+                        value={decryptDuration}
+                        onChange={(e) => setDecryptDuration(parseFloat(e.target.value))}
+                        className="w-full h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-[#2E9A4F]"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CARD 3: SPLIT-TONE CONTRAST SLIDER (FULL WIDTH CONTAINER SPANNING 2 COLUMNS) */}
+            <div className="bg-white border border-[#E3EADD] rounded-3xl p-8 flex flex-col justify-between min-h-[380px] lg:col-span-2 relative shadow-sm overflow-hidden group">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/5 rounded-full filter blur-2xl pointer-events-none" />
+              
+              <div>
+                <div className="flex justify-between items-start mb-4">
+                  <div>
+                    <span className="text-[10px] font-black tracking-widest text-[#2E9A4F] uppercase">Variant 03</span>
+                    <h3 className="font-extrabold text-lg text-[#0F2A1E] mt-1">Split-Tone Contrast Mask Slider</h3>
+                  </div>
+                  <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 text-[#2E9A4F] font-mono text-[9px] font-bold rounded">
+                    Dual Clip-Path
+                  </span>
+                </div>
+                <p className="text-xs text-[#586b5e] leading-relaxed mb-6">
+                  Drag the custom control slider below to smoothly glide a color inversion plane. In the left chamber, characters are deep slate green on linen. In the right chamber, they instantly invert to pristine white on an emerald slate backdrop.
+                </p>
+
+                {/* Sliding Dual Chambers Canvas */}
+                <div className="relative h-64 w-full rounded-2xl border border-[#E3EADD] overflow-hidden select-none">
+                  
+                  {/* Left Chamber: Soft Linen Background & Dark green text */}
+                  <div className="absolute inset-0 bg-[#FAFCF8] flex items-center justify-center">
+                    <div className="w-full text-center px-4">
+                      <div className="text-[clamp(2rem,6vw,4.5rem)] font-black leading-none text-[#0F2A1E] tracking-tight">
+                        ECOBINS WASHING
+                      </div>
+                      <div className="font-mono text-[10px] text-[#586b5e] tracking-widest uppercase mt-4">
+                        PROFESSIONAL HYGIENE SPECIALISTS • WYNDHAM WEST
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Chamber: Emerald Green Background & Linen text (clipthed over the first) */}
+                  <div 
+                    className="absolute inset-0 bg-[#0F2A1E] flex items-center justify-center transition-all duration-75"
+                    style={{
+                      clipPath: `polygon(${splitPos}% 0%, 100% 0%, 100% 100%, ${splitPos}% 100%)`
+                    }}
+                  >
+                    <div className="w-full text-center px-4">
+                      <div className="text-[clamp(2rem,6vw,4.5rem)] font-black leading-none text-[#FAFCF8] tracking-tight">
+                        ECOBINS WASHING
+                      </div>
+                      <div className="font-mono text-[10px] text-[#2E9A4F] tracking-widest uppercase mt-4">
+                        PROFESSIONAL HYGIENE SPECIALISTS • WYNDHAM WEST
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Graphic Inversion Divider Handle */}
+                  <div 
+                    className="absolute top-0 bottom-0 w-1 bg-gradient-to-b from-[#2E9A4F] via-[#2E9A4F] to-[#0C3A52] pointer-events-none cursor-ew-resize"
+                    style={{ left: `${splitPos}%`, transform: 'translateX(-50%)' }}
+                  >
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#FAFCF8] border-2 border-[#2E9A4F] flex items-center justify-center shadow-lg text-[#0F2A1E]">
+                      <Sliders size={14} className="rotate-90 text-[#2E9A4F]" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Slider controls & fast presets */}
+              <div className="mt-8 space-y-4 pt-6 border-t border-[#E3EADD]/60">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+                  
+                  {/* Slider Element */}
+                  <div className="w-full md:flex-1">
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-[10px] font-black uppercase text-[#0F2A1E] tracking-wider">Drag Contrast Plane</span>
+                      <span className="text-[10px] font-mono font-bold text-[#2E9A4F]">{splitPos}% Split</span>
+                    </div>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      value={splitPos}
+                      onChange={(e) => setSplitPos(parseInt(e.target.value))}
+                      className="w-full h-1.5 bg-[#E3EADD] rounded-lg appearance-none cursor-pointer accent-[#2E9A4F]"
+                    />
+                  </div>
+
+                  {/* Fast Jump Presets */}
+                  <div className="flex gap-2 w-full md:w-auto">
+                    {([15, 30, 50, 70, 85] as const).map((pct) => (
+                      <button
+                        key={pct}
+                        onClick={() => setSplitPos(pct)}
+                        className={`flex-1 md:flex-none text-[10px] font-mono font-bold px-3 py-2 border rounded-xl transition-all ${
+                          splitPos === pct
+                            ? "bg-[#0C3A52] text-white border-[#0C3A52]"
+                            : "bg-white text-[#586b5e] border-[#E3EADD] hover:border-slate-400 hover:text-[#0F2A1E]"
+                        }`}
+                      >
+                        {pct}% Split
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CARD 4: FLUID POINTER ELASTIC TEXT */}
+            <div className="bg-white border border-[#E3EADD] rounded-3xl p-8 flex flex-col justify-between min-h-[380px] relative shadow-sm overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full filter blur-xl pointer-events-none" />
+              
+              <div>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-[10px] font-black tracking-widest text-[#2E9A4F] uppercase">Variant 04</span>
+                    <h3 className="font-extrabold text-lg text-[#0F2A1E] mt-1">Fluid Elastic Letter Proximity</h3>
+                  </div>
+                  <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 text-[#2E9A4F] font-mono text-[9px] font-bold rounded">
+                    Kinetic Springs
+                  </span>
+                </div>
+                
+                {/* Reactive Characters Box */}
+                <div className="mt-8 min-h-[140px] flex items-center justify-center py-4 bg-[#FAFCF8] rounded-2xl px-6 border border-[#E3EADD]/60 overflow-hidden relative">
+                  <div className="absolute top-3 right-4 text-[9px] font-mono text-slate-400 uppercase flex items-center gap-1 pointer-events-none">
+                    <Pointer size={10} className="animate-bounce" />
+                    Hover Characters
+                  </div>
+                  
+                  <div className="flex gap-0.5 select-none">
+                    {"PREMIUM PRESSURE".split("").map((char, idx) => {
+                      if (char === " ") return <span key={idx} className="w-4" />;
+                      
+                      // Elastic Spring physics mapping based on presets
+                      const physicsConfig = {
+                        wobbly: { type: "spring", stiffness: 350, damping: 8, mass: 0.5 },
+                        snappy: { type: "spring", stiffness: 450, damping: 22, mass: 0.7 },
+                        heavy: { type: "spring", stiffness: 120, damping: 18, mass: 1.8 }
+                      } as const;
+                      
+                      return (
+                        <motion.span
+                          key={idx}
+                          className="inline-block font-black text-2xl md:text-3xl text-[#0F2A1E] cursor-pointer"
+                          whileHover={{
+                            scaleY: 1.45,
+                            scaleX: 0.8,
+                            y: -18,
+                            color: "#2E9A4F",
+                          }}
+                          transition={physicsConfig[elasticTension] || physicsConfig.wobbly}
+                        >
+                          {char}
+                        </motion.span>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Controls and Telemetry */}
+              <div className="mt-8 space-y-6 pt-6 border-t border-[#E3EADD]/60">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Tension preset toggler */}
+                  <div>
+                    <label className="block text-[10px] font-black uppercase text-[#0F2A1E] tracking-wider mb-2">
+                      Elastic Stiffness Preset
+                    </label>
+                    <div className="flex gap-1.5 bg-[#FAFCF8] p-1 rounded-xl border border-[#E3EADD]/60">
+                      {(["wobbly", "snappy", "heavy"] as const).map((preset) => (
+                        <button
+                          key={preset}
+                          onClick={() => setElasticTension(preset)}
+                          className={`flex-1 text-[10px] font-extrabold py-2 px-2.5 rounded-lg transition-all capitalize ${
+                            elasticTension === preset
+                              ? "bg-[#0C3A52] text-white shadow-sm"
+                              : "text-[#586b5e] hover:bg-slate-100 hover:text-[#0F2A1E]"
+                          }`}
+                        >
+                          {preset}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Live Spring Constant Readout */}
+                  <div className="bg-[#0C3A52] text-emerald-400 font-mono text-[10px] p-4 rounded-2xl border border-emerald-500/20 shadow-inner">
+                    <div className="flex items-center gap-1.5 text-emerald-300 font-extrabold uppercase text-[9px] mb-2 border-b border-emerald-400/20 pb-1.5">
+                      <Activity size={10} />
+                      Elastic Constants
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="flex justify-between">
+                        <span>Spring Type:</span>
+                        <span className="text-white font-bold">Overdamped</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Tension Force:</span>
+                        <span className="text-white font-bold">
+                          {elasticTension === "wobbly" ? "350 N/m" : elasticTension === "snappy" ? "450 N/m" : "120 N/m"}
+                        </span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Frictional Drag:</span>
+                        <span className="text-white font-bold">
+                          {elasticTension === "wobbly" ? "8 Ns/m" : elasticTension === "snappy" ? "22 Ns/m" : "18 Ns/m"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* CARD 5: SVG CURVING PATH RIBBON */}
+            <div className="bg-white border border-[#E3EADD] rounded-3xl p-8 flex flex-col justify-between min-h-[380px] relative shadow-sm overflow-hidden group">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/5 rounded-full filter blur-xl pointer-events-none" />
+              
+              <div>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-[10px] font-black tracking-widest text-[#2E9A4F] uppercase">Variant 05</span>
+                    <h3 className="font-extrabold text-lg text-[#0F2A1E] mt-1">SVG Curving Path Spline Ribbon</h3>
+                  </div>
+                  <span className="px-2 py-0.5 bg-emerald-50 border border-emerald-100 text-[#2E9A4F] font-mono text-[9px] font-bold rounded">
+                    Scroll-Velocity Loop
+                  </span>
+                </div>
+                
+                {/* SVG Spline Canvas */}
+                <div className="mt-8 min-h-[140px] flex items-center justify-center bg-[#FAFCF8] rounded-2xl border border-[#E3EADD]/60 overflow-hidden relative">
+                  <div className="absolute top-3 right-4 text-[9px] font-mono text-slate-400 uppercase flex items-center gap-1 pointer-events-none z-10">
+                    <Activity size={10} className="animate-pulse text-[#2E9A4F]" />
+                    Scroll Wheel Accelerated
+                  </div>
+
+                  <svg viewBox="0 0 800 240" className="w-full h-full select-none pointer-events-none">
+                    <defs>
+                      <path
+                        id="s-curve-path"
+                        d="M 50,120 C 200,10 400,230 550,120 S 700,40 850,120"
+                        fill="transparent"
+                      />
+                      <path
+                        id="loop-path"
+                        d="M 50,120 C 250,20 350,220 450,120 C 550,20 650,220 850,120"
+                        fill="transparent"
+                      />
+                    </defs>
+                    
+                    {/* Visual Vector Spline backline with soft dashed highlight */}
+                    <path
+                      d={splineShape === "s-curve" 
+                        ? "M 50,120 C 200,10 400,230 550,120 S 700,40 850,120"
+                        : "M 50,120 C 250,20 350,220 450,120 C 550,20 650,220 850,120"
+                      }
+                      fill="none"
+                      stroke="#E3EADD"
+                      strokeWidth="2"
+                      strokeDasharray="4 6"
+                      className="opacity-80"
+                    />
+
+                    {/* Sliding crawl ribbon */}
+                    <text className="font-extrabold text-sm font-mono fill-[#0F2A1E] tracking-widest uppercase">
+                      <textPath 
+                        href={splineShape === "s-curve" ? "#s-curve-path" : "#loop-path"} 
+                        startOffset={`${splineOffset}%`}
+                      >
+                        ⚡ SANITISED • TRUGANINA • POINT COOK • WERRIBEE • TARNEIT • SUBSCRIPTION COMPLETED • ⚡
+                      </textPath>
+                    </text>
+                  </svg>
+                </div>
+              </div>
+
+              {/* Spline ribbon controls */}
+              <div className="mt-8 space-y-6 pt-6 border-t border-[#E3EADD]/60">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* Selectors and speeds */}
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-[10px] font-black uppercase text-[#0F2A1E] tracking-wider mb-2">
+                        Spline Vector Shape
+                      </label>
+                      <div className="flex gap-1.5 bg-[#FAFCF8] p-1 rounded-xl border border-[#E3EADD]/60">
+                        {(["s-curve", "loop"] as const).map((shape) => (
+                          <button
+                            key={shape}
+                            onClick={() => setSplineShape(shape)}
+                            className={`flex-1 text-[10px] font-extrabold py-2 px-2.5 rounded-lg transition-all capitalize ${
+                              splineShape === shape
+                                ? "bg-[#0C3A52] text-white shadow-sm"
+                                : "text-[#586b5e] hover:bg-slate-100 hover:text-[#0F2A1E]"
+                            }`}
+                          >
+                            {shape === "s-curve" ? "S-Curve Vector" : "Looping Vector"}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between items-center mb-1.5">
+                        <label className="text-[10px] font-black uppercase text-[#0F2A1E] tracking-wider">
+                          Base Crawl Speed
+                        </label>
+                        <span className="text-[10px] font-mono font-bold text-[#2E9A4F]">{splineBaseSpeed}px/f</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="0.05"
+                        max="0.80"
+                        step="0.05"
+                        value={splineBaseSpeed}
+                        onChange={(e) => setSplineBaseSpeed(parseFloat(e.target.value))}
+                        className="w-full h-1 bg-[#E3EADD] rounded-lg appearance-none cursor-pointer accent-[#2E9A4F]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Telemetry and metrics */}
+                  <div className="bg-[#0C3A52] text-emerald-400 font-mono text-[10px] p-4 rounded-2xl border border-emerald-500/20 shadow-inner flex flex-col justify-between">
+                    <div>
+                      <div className="flex items-center gap-1.5 text-emerald-300 font-extrabold uppercase text-[9px] mb-2 border-b border-emerald-400/20 pb-1.5">
+                        <Activity size={10} className="animate-pulse" />
+                        Ribbon Telemetry
+                      </div>
+                      <div className="space-y-1">
+                        <div className="flex justify-between">
+                          <span>Base Vector:</span>
+                          <span className="text-white font-bold capitalize">{splineShape}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Start Offset:</span>
+                          <span className="text-emerald-300">{splineOffset.toFixed(1)}%</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Tick Loop:</span>
+                          <span className="text-emerald-300">60 fps active</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="text-[8px] text-emerald-500/70 uppercase font-bold text-right pt-2">
+                      Scroll mouse wheel to accelerate
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
