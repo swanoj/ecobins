@@ -8,7 +8,10 @@
 		"start": "next start",
 		"lint": "biome lint .",
 		"format": "biome format --write .",
-		"check": "biome check --write ."
+		"check": "biome check --write .",
+		"test:visual": "playwright test",
+		"test:visual:update": "playwright test --update-snapshots",
+		"test:visual:ui": "playwright test --ui"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^5.4.0",
@@ -35,6 +38,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.16",
+		"@playwright/test": "^1.60.0",
 		"@tailwindcss/postcss": "^4",
 		"@theatre/studio": "^0.7.2",
 		"@types/node": "^20",
